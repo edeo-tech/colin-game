@@ -84,7 +84,7 @@ export default function Login() {
                     {loginError && (
                         <div className="rounded-md bg-red-900 border border-red-700 p-4">
                             <div className="text-sm text-red-300">
-                                {loginError.message || 'Login failed. Please check your credentials.'}
+                                {loginError.message}
                             </div>
                         </div>
                     )}

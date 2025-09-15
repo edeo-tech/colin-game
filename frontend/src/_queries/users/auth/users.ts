@@ -6,10 +6,29 @@ import { setAuthTokens, clearAuthTokens, setUserName, clearUserName, getAccessTo
 export const useRegister = () => {
     const queryClient = useQueryClient();
     
-    return useMutation<LoginResponse, Error, RegisterUser>({
+    return useMutation<any, Error, RegisterUser>({
         mutationFn: async (userData: RegisterUser) => {
-            const response = await usersAuthApi.register(userData);
-            return response.data;
+            try {
+                // First register the user
+                const registerResponse = await usersAuthApi.register(userData);
+                
+                // Then automatically login with the same credentials
+                const loginResponse = await usersAuthApi.login({
+                    email: userData.email,
+                    password: userData.password
+                });
+                
+                return loginResponse.data;
+            } catch (error: any) {
+                // Extract the error message from the backend response
+                if (error.response?.data?.detail) {
+                    throw new Error(error.response.data.detail);
+                } else if (error.response?.status === 400) {
+                    throw new Error('Registration failed. Please check your information.');
+                } else {
+                    throw new Error('Registration failed. Please try again.');
+                }
+            }
         },
         onSuccess: (data) => {
             setAuthTokens(data.tokens.access_token, data.tokens.refresh_token);
@@ -27,8 +46,19 @@ export const useLogin = () => {
     
     return useMutation<LoginResponse, Error, LoginUser>({
         mutationFn: async (credentials: LoginUser) => {
-            const response = await usersAuthApi.login(credentials);
-            return response.data;
+            try {
+                const response = await usersAuthApi.login(credentials);
+                return response.data;
+            } catch (error: any) {
+                // Extract the error message from the backend response
+                if (error.response?.data?.detail) {
+                    throw new Error(error.response.data.detail);
+                } else if (error.response?.status === 401) {
+                    throw new Error('Invalid email or password');
+                } else {
+                    throw new Error('Login failed. Please try again.');
+                }
+            }
         },
         onSuccess: (data) => {
             setAuthTokens(data.tokens.access_token, data.tokens.refresh_token);

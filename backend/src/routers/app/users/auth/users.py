@@ -73,10 +73,9 @@ async def checkAuth(
     await update_user_last_active_at(req, user_id)
 
 
-    current_user = AuthenticatedUser(**jsonable_encoder(
-        user
-    )).model_dump(exclude_none=True)
-    current_user['id'] = user_id
+    user_data = jsonable_encoder(user)
+    user_data['id'] = user_id
+    current_user = AuthenticatedUser(**user_data).model_dump(exclude_none=True)
 
     return JSONResponse(
         status_code=200,

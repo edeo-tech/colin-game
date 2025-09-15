@@ -20,9 +20,6 @@ async def create_user(req:Request, user:User):
     while await check_if_username_is_taken(req, user.username):
         user.username += '_'
 
-    ## check that phone number is not already taken
-    if await check_if_phone_number_is_taken(req, user.phone_number):
-        raise HTTPException(status_code=400, detail='Phone number already taken')
 
     ## strip username of any invalid characters
     user.username = remove_invalid_username_characters(user.username)
@@ -80,20 +77,12 @@ async def check_if_username_is_taken(req:Request, username:str):
     )
     return user is not None
 
-async def check_if_phone_number_is_taken(req:Request, phone_number:str):
-    user = await _db_actions.getDocument(
-        req=req,
-        collection_name='users',
-        BaseModel=User,
-        phone_number=phone_number
-    )
-    return user is not None
 
 async def get_user_by_id(req:Request, user_id:str):
     user = await _db_actions.getDocument(
         req=req,
         collection_name='users',
         BaseModel=User,
-        document_id=user_id
+        id=user_id
     )
     return user

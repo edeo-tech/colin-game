@@ -93,7 +93,7 @@ export default function Register() {
                     {registerError && (
                         <div className="rounded-md bg-red-900 border border-red-700 p-4">
                             <div className="text-sm text-red-300">
-                                {registerError.message || 'Registration failed. Please try again.'}
+                                {registerError.message}
                             </div>
                         </div>
                     )}
