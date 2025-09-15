@@ -24,7 +24,7 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <h1 className="text-xl font-semibold text-white">Dashboard</h1>
+                            <h1 className="text-xl font-semibold text-white">Home</h1>
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-gray-300">Welcome, {auth.username}!</span>
@@ -43,7 +43,7 @@ export default function Home() {
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="px-4 py-6 sm:px-0 space-y-6">
                     {/* Welcome Section */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl shadow-black/20">
+                    {/* <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-xl shadow-black/20">
                         <div className="text-center">
                             <h2 className="text-3xl font-bold text-white mb-4">This is home</h2>
                             <div className="text-gray-300 space-y-2">
@@ -53,7 +53,7 @@ export default function Home() {
                                 <p>XP Earned: {auth.xp_earned}</p>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Navigation Cards */}
                     <div className="grid gap-6 sm:grid-cols-2">
