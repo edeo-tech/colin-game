@@ -13,7 +13,7 @@ from crud.questions.questions import (
     update_question,
     delete_question
 )
-from utils.errors.error_decorator_routes import error_decorator
+from utils.__errors__.error_decorator_routes import error_decorator
 from authentication import Authorization
 
 router = APIRouter()
