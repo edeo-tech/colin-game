@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MatchQuestion } from '@/_interfaces/questions/questions';
 
 interface MatchQuestionProps {
@@ -54,7 +54,7 @@ export default function MatchQuestionComponent({
             const pairs = Object.entries(question.pairs);
             
             // Create items for keys (left side)
-            const keys: MatchItem[] = pairs.map(([key, value], index) => ({
+            const keys: MatchItem[] = pairs.map(([key], index) => ({
                 id: `key-${index}`,
                 text: key,
                 type: 'key',
@@ -86,6 +86,20 @@ export default function MatchQuestionComponent({
         setWrongMatch(null);
     }, [question?.id, question?.pairs]);
 
+    const handleAutoSubmit = useCallback(() => {
+        // Check if all matches are correct
+        const allCorrect = matches.length === Object.keys(question.pairs).length;
+        setIsCorrect(allCorrect);
+        setShowResult(true);
+
+        if (allCorrect) {
+            // Auto move to next question after delay
+            setTimeout(() => {
+                onCorrectAnswer();
+            }, 1500);
+        }
+    }, [matches.length, question.pairs, onCorrectAnswer]);
+
     // Auto-submit when all pairs are matched
     useEffect(() => {
         if (leftItems.length > 0 && matches.length === leftItems.length && !showResult) {
@@ -94,7 +108,7 @@ export default function MatchQuestionComponent({
                 handleAutoSubmit();
             }, 500);
         }
-    }, [matches.length, leftItems.length, showResult]);
+    }, [matches.length, leftItems.length, showResult, handleAutoSubmit]);
 
     // Safety check for question data
     if (!question || !question.pairs) {
@@ -169,20 +183,6 @@ export default function MatchQuestionComponent({
             }
             
             setSelectedItem(null);
-        }
-    };
-
-    const handleAutoSubmit = () => {
-        // Check if all matches are correct
-        const allCorrect = matches.length === Object.keys(question.pairs).length;
-        setIsCorrect(allCorrect);
-        setShowResult(true);
-
-        if (allCorrect) {
-            // Auto move to next question after delay
-            setTimeout(() => {
-                onCorrectAnswer();
-            }, 1500);
         }
     };
 
@@ -284,7 +284,7 @@ export default function MatchQuestionComponent({
                 <div className="text-center">
                     <div className="p-4 rounded-xl bg-red-900/50 border border-red-700">
                         <div className="text-red-200 font-semibold">❌ Wrong Match!</div>
-                        <div className="text-red-300 text-sm mt-1">These items don't belong together</div>
+                        <div className="text-red-300 text-sm mt-1">These items don&apos;t belong together</div>
                     </div>
                 </div>
             )}

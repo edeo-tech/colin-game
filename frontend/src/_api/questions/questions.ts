@@ -1,5 +1,5 @@
 import axiosConfig from '@/lib/axios';
-import { Question, QuestionParams, QuestionType } from '@/_interfaces/questions/questions';
+import { QuestionParams, QuestionType } from '@/_interfaces/questions/questions';
 
 export interface AnswerCheckRequest {
     user_answer: string;

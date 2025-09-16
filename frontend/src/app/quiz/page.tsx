@@ -238,7 +238,7 @@ export default function Quiz() {
                                 {!['multiple_choice', 'true_false', 'fill_blank', 'order', 'match'].includes(currentQuestion.type) && (
                                     <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 text-center">
                                         <div className="text-red-300">
-                                            Error: Unknown question type "{currentQuestion.type}"
+                                            Error: Unknown question type &quot;{currentQuestion.type}&quot;
                                         </div>
                                         <pre className="mt-2 text-xs text-gray-400">
                                             {JSON.stringify(currentQuestion, null, 2)}

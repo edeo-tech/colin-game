@@ -1,5 +1,5 @@
 import axiosConfig from '@/lib/axios';
-import { LeaderboardEntry, LeaderboardEntryCreate } from '@/_interfaces/leaderboard/leaderboard';
+import { LeaderboardEntryCreate } from '@/_interfaces/leaderboard/leaderboard';
 
 const BASE_PATH = '/app/leaderboard';
 

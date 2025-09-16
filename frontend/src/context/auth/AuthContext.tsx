@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
     const [hasNavigated, setHasNavigated] = useState(false);
     
-    const { data: auth, isLoading: authLoading, error: authError } = useCheckAuth();
+    const { data: auth, isLoading: authLoading } = useCheckAuth();
     const { mutate: login, isPending: loginLoading, error: loginError, isSuccess: loginSuccess } = useLogin();
     const { mutate: register, isPending: registerLoading, error: registerError, isSuccess: registerSuccess } = useRegister();
     const { mutate: logout, isPending: logoutLoading, error: logoutError } = useLogout();

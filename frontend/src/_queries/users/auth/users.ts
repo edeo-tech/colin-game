@@ -6,11 +6,11 @@ import { setAuthTokens, clearAuthTokens, setUserName, clearUserName, getAccessTo
 export const useRegister = () => {
     const queryClient = useQueryClient();
     
-    return useMutation<any, Error, RegisterUser>({
+    return useMutation<LoginResponse, Error, RegisterUser>({
         mutationFn: async (userData: RegisterUser) => {
             try {
                 // First register the user
-                const registerResponse = await usersAuthApi.register(userData);
+                await usersAuthApi.register(userData);
                 
                 // Then automatically login with the same credentials
                 const loginResponse = await usersAuthApi.login({
@@ -19,15 +19,17 @@ export const useRegister = () => {
                 });
                 
                 return loginResponse.data;
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // Extract the error message from the backend response
-                if (error.response?.data?.detail) {
-                    throw new Error(error.response.data.detail);
-                } else if (error.response?.status === 400) {
-                    throw new Error('Registration failed. Please check your information.');
-                } else {
-                    throw new Error('Registration failed. Please try again.');
+                if (error && typeof error === 'object' && 'response' in error) {
+                    const axiosError = error as { response?: { data?: { detail?: string }; status?: number } };
+                    if (axiosError.response?.data?.detail) {
+                        throw new Error(axiosError.response.data.detail);
+                    } else if (axiosError.response?.status === 400) {
+                        throw new Error('Registration failed. Please check your information.');
+                    }
                 }
+                throw new Error('Registration failed. Please try again.');
             }
         },
         onSuccess: (data) => {
@@ -49,15 +51,17 @@ export const useLogin = () => {
             try {
                 const response = await usersAuthApi.login(credentials);
                 return response.data;
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // Extract the error message from the backend response
-                if (error.response?.data?.detail) {
-                    throw new Error(error.response.data.detail);
-                } else if (error.response?.status === 401) {
-                    throw new Error('Invalid email or password');
-                } else {
-                    throw new Error('Login failed. Please try again.');
+                if (error && typeof error === 'object' && 'response' in error) {
+                    const axiosError = error as { response?: { data?: { detail?: string }; status?: number } };
+                    if (axiosError.response?.data?.detail) {
+                        throw new Error(axiosError.response.data.detail);
+                    } else if (axiosError.response?.status === 401) {
+                        throw new Error('Invalid email or password');
+                    }
                 }
+                throw new Error('Login failed. Please try again.');
             }
         },
         onSuccess: (data) => {

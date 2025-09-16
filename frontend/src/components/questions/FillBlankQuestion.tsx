@@ -30,7 +30,7 @@ export default function FillBlankQuestionComponent({
         setIsCorrect(false);
         setCorrectionReason('');
         checkAnswerMutation.reset(); // Reset mutation state
-    }, [question?.id, question?.question]); // Removed checkAnswerMutation from dependencies
+    }, [question?.id, question?.question, checkAnswerMutation]); // Reset mutation separately
 
     // Debug logging and safety check (commented out to prevent constant logging)
     // console.log('FillBlankQuestion received:', question);
