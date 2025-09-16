@@ -35,137 +35,129 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-Implementation Plan for Dual Leaderboard System
+Admin Leaderboard Implementation Plan
 
-  Phase 1: Backend Models & Database Structure
+  1. Data Structure & State Management
 
-  1.1 Create New Models
+  - Polling System:
+    - Use React Query with 10-second refetch interval
+    - Implement refetchInterval: 10000 on both leaderboard queries
+    - Track previous positions to detect changes for animations
+  - State Requirements:
+    - National leaderboard data with position tracking
+    - School leaderboard data with position tracking
+    - Date range filters (separate for each leaderboard)
+    - Search filters (username for national, school name for schools)
+    - Previous positions map for animation detection
 
-  - NationalLeaderboard model with fields:
-    - username (string, for filtering)
-    - user_id (string, for user identification)
-    - score (int, individual quiz score)
-    - date (date, extracted from created_at for easier filtering)
-    - Standard MongoBaseModel fields (id, created_at, updated_at)
-  - SchoolLeaderboard model with fields:
-    - school_id (string, reference to school)
-    - school_name (string, for filtering and display)
-    - total_score (int, sum of all users' scores for that school on that date)
-    - date (date, for daily entries)
-    - user_count (int, number of users who contributed to this total)
-    - Standard MongoBaseModel fields
+  2. Component Architecture
 
-  1.2 Update Model Mappings
+  AdminLeaderboard
+  ├── LeaderboardSection (reusable)
+  │   ├── DateFilter
+  │   ├── SearchInput (hidden by default)
+  │   └── AnimatedLeaderboardList
+  │       └── AnimatedLeaderboardEntry
 
-  - Add both collections to CollectionModelMatch
-  - Remove or deprecate the old leaderboard collection
+  3. Animation System
 
-  Phase 2: Backend CRUD Functions
+  - Position Changes:
+    - Track previous position in state
+    - When position changes: slide animation up/down
+    - New entries: fade + slide in from side
+    - Use CSS transitions or Framer Motion
+  - Animation States:
+    - moving-up: green highlight + upward slide
+    - moving-down: red highlight + downward slide
+    - new-entry: yellow highlight + fade in
+    - stable: no animation
 
-  2.1 National Leaderboard CRUD
+  4. Search Filter Behavior
 
-  - create_national_entry() - Create individual user score entry
-  - get_national_all_time() - Get highest score per user (no limit, all users)
-  - get_national_by_date() - Get highest score per user for specific date
-  - get_national_filtered() - Apply username filter to any result set
+  - Implementation:
+    - Filter entries but maintain original position numbers
+    - Hidden entries create gaps in the visual list
+    - Matching entries stay at their true position
+    - Toggle search with keyboard shortcut (Ctrl+F)
+  - Visual Example:
+  Without filter:        With "mary" filter:
+  1. John Smith
+  2. Jane Doe
+  3. Mary Jones         3. Mary Jones ✓
+  4. Bob Wilson
+  5. Mary Brown         5. Mary Brown ✓
 
-  2.2 School Leaderboard CRUD
+  5. Date Filtering
 
-  - create_or_update_school_entry() - Create new daily entry or update existing
-  - get_school_all_time() - Sum all daily totals per school across all time
-  - get_school_by_date() - Get all school scores for specific date
-  - get_school_filtered() - Apply school name filter to any result set
+  - Options for each leaderboard:
+    - Today
+    - Last 7 days
+    - Last 30 days
+    - Last 3 months
+    - All time
+    - Custom date range
 
-  2.3 Combined Score Processing Function
+  6. Technical Implementation Steps
 
-  - process_quiz_completion() - Main function that:
-    a. Creates national leaderboard entry
-    b. If user has school_id, creates/updates school leaderboard entry
-    c. Handles all the logic for daily school score aggregation
+  Phase 1: Update Queries & API
 
-  Phase 3: Backend Routes Updates
+  - Add date range parameters to leaderboard queries
+  - Implement polling with React Query
+  - Create position tracking logic
 
-  3.1 New Leaderboard Routes Structure
+  Phase 2: Create Base Components
 
-  - /app/leaderboard/national/all-time - Get all national scores (highest per user)
-  - /app/leaderboard/national/date/{date} - Get national scores for specific date
-  - /app/leaderboard/school/all-time - Get school totals (sum of all daily totals)
-  - /app/leaderboard/school/date/{date} - Get school scores for specific date
-  - /app/leaderboard/submit-score - Submit quiz score (replaces old create endpoint)
+  - Build LeaderboardSection component
+  - Implement DateFilter dropdown
+  - Create hidden SearchInput with toggle
 
-  3.2 Query Parameters
+  Phase 3: Animation System
 
-  - username filter for national leaderboards
-  - school_name filter for school leaderboards
-  - limit parameter (remove for all-time, keep for date-specific)
+  - Create AnimatedLeaderboardEntry component
+  - Implement position change detection
+  - Add CSS/Framer Motion animations
 
-  Phase 4: Frontend Interface Updates
+  Phase 4: Search Filter Logic
 
-  4.1 New Interfaces
+  - Implement search filtering while preserving positions
+  - Add keyboard shortcut for search toggle
+  - Ensure filtered items maintain original rankings
 
-  - Update existing leaderboard interfaces
-  - Add school leaderboard specific interfaces
-  - Add filter parameters to query interfaces
+  Phase 5: Polish & Testing
 
-  4.2 New API Functions
+  - Fine-tune animations timing
+  - Test with rapid data changes
+  - Ensure smooth performance with many entries
 
-  - Update existing API calls to use new endpoints
-  - Add functions for school leaderboard queries
-  - Add filtering capabilities
+  7. Key Features Summary
 
-  4.3 New Query Hooks
+  1. ✅ Dual leaderboards (national & school)
+  2. ✅ 10-second auto-refresh
+  3. ✅ Smooth animations for position changes
+  4. ✅ Date filtering (independent for each)
+  5. ✅ Hidden search with position preservation
+  6. ✅ Visual indicators for rank changes
 
-  - useNationalAllTime() with username filter
-  - useNationalByDate() with username filter
-  - useSchoolAllTime() with school name filter
-  - useSchoolByDate() with school name filter
+  8. Additional Considerations
 
-  Phase 5: Frontend UI Updates
+  - Performance optimization for large lists
+  - Smooth animations even with frequent updates
+  - Clear visual feedback for data refreshes
+  - Maintain scroll position during updates
 
-  5.1 Leaderboard Page Restructure
+● Update Todos
+  ⎿  ☒ Create implementation plan for admin leaderboard
 
-  - Add tabs/sections for National vs School leaderboards
-  - Add filter inputs (username for national, school name for school)
-  - Add date picker for date-specific views
-  - Update LeaderboardTable component to handle both types
+● This plan covers all your requirements:
+  - ✅ Both national and school leaderboards
+  - ✅ 10-second polling for live updates
+  - ✅ Smooth animations for position changes and new entries
+  - ✅ Separate date filters for each leaderboard
+  - ✅ Hidden search that preserves position numbers
+  - ✅ Clear structure for implementation
 
-  5.2 New Components
+  The key insight is tracking previous positions to detect changes and using CSS classes to trigger appropriate
+  animations. The search filter will use a "visibility" approach rather than removing items from the DOM, which allows us
+  to maintain the original position numbers.
 
-  - LeaderboardTabs - Switch between National/School
-  - LeaderboardFilters - Handle username/school name/date filters
-  - Update LeaderboardTable - Support both user and school entries
-
-  Phase 6: Quiz Integration
-
-  6.1 Update Quiz Completion
-
-  - Modify quiz completion API call to use new /submit-score endpoint
-  - Ensure user's school_id is passed if available
-  - Handle both national and school leaderboard creation in single call
-
-  Phase 7: Data Migration & Testing
-
-  7.1 Migration Strategy
-
-  - Create migration script to move existing leaderboard data to national_leaderboard
-  - Aggregate existing data by school (if school associations exist)
-  - Test with existing data
-
-  7.2 Backward Compatibility
-
-  - Keep old endpoints temporarily with deprecation warnings
-  - Ensure existing frontend continues to work during migration
-
-  ---
-  Key Logic Points:
-
-  1. National Leaderboard: One entry per quiz attempt, filtered to show highest score per user
-  2. School Leaderboard: Daily aggregated totals per school, summed across all time for all-time view
-  3. Quiz Completion Flow: Single API call creates both national entry and updates school total
-  4. Filtering: Applied client-side on returned results for better UX
-  5. Date Handling: Store date separately from timestamp for easier querying
-  6. No Limits on All-Time: Return all users/schools for comprehensive leaderboards
-
-  This plan maintains the existing functionality while adding the new dual leaderboard system with proper filtering
-   and date-based queries. Would you like me to proceed with implementation, or do you have any modifications to
-  this plan?
+  Would you like me to proceed with implementing this plan?

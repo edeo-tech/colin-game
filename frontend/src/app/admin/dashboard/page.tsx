@@ -1,14 +1,58 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import AdminGuard from '@/components/auth/AdminGuard';
 import Link from 'next/link';
+import { useGetAllSchools, useCreateSchool, useCountSchools } from '@/_queries/schools/schools';
+import { IRISH_COUNTIES } from '@/_interfaces/schools/schools';
 
 export default function AdminDashboard() {
     const { auth, logout, logoutLoading } = useAuth();
+    
+    // School form state
+    const [schoolName, setSchoolName] = useState('');
+    const [selectedCounty, setSelectedCounty] = useState('Dublin');
+    const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
+    
+    // Queries
+    const { data: allSchools } = useGetAllSchools();
+    const { data: schoolCount } = useCountSchools();
+    const createSchoolMutation = useCreateSchool();
+    
+    // Filter school suggestions based on input
+    const schoolSuggestions = allSchools?.filter(school => 
+        school.school_name.toLowerCase().includes(schoolName.toLowerCase()) &&
+        school.county === selectedCounty
+    ).slice(0, 5) || [];
 
     const handleLogout = () => {
         logout();
+    };
+    
+    const handleCreateSchool = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!schoolName.trim()) {
+            alert('Please enter a school name');
+            return;
+        }
+        
+        try {
+            await createSchoolMutation.mutateAsync({
+                school_name: schoolName.trim(),
+                county: selectedCounty,
+                country: 'Ireland'
+            });
+            
+            // Reset form
+            setSchoolName('');
+            setSelectedCounty('Dublin');
+            alert('School created successfully!');
+        } catch (error) {
+            console.error('Error creating school:', error);
+            alert('Error creating school. Please try again.');
+        }
     };
 
     return (
@@ -46,111 +90,104 @@ export default function AdminDashboard() {
                 </nav>
 
                 {/* Main Content */}
-                <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-                    {/* Welcome Section */}
+                <main className="max-w-4xl mx-auto px-4 py-8">
+                    {/* School Creation Form */}
                     <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8">
-                        <h2 className="text-2xl font-bold text-white mb-4">Admin Dashboard</h2>
-                        <p className="text-gray-300 mb-6">
-                            Welcome to the admin dashboard. Here you can manage various aspects of the application.
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Stats Cards */}
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6">
-                                <div className="text-gray-400 text-sm mb-2">Total Users</div>
-                                <div className="text-3xl font-bold text-white">-</div>
+                        <h2 className="text-2xl font-bold text-white mb-6">Create New School</h2>
+                        
+                        <form onSubmit={handleCreateSchool} className="space-y-6">
+                            {/* County Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    County
+                                </label>
+                                <select
+                                    value={selectedCounty}
+                                    onChange={(e) => setSelectedCounty(e.target.value)}
+                                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg 
+                                             text-white focus:border-blue-500 focus:outline-none transition-colors"
+                                >
+                                    {IRISH_COUNTIES.map(county => (
+                                        <option key={county} value={county}>{county}</option>
+                                    ))}
+                                </select>
                             </div>
                             
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6">
-                                <div className="text-gray-400 text-sm mb-2">Total Questions</div>
-                                <div className="text-3xl font-bold text-white">-</div>
+                            {/* School Name Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    School Name
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={schoolName}
+                                        onChange={(e) => {
+                                            setSchoolName(e.target.value);
+                                            setShowSchoolSuggestions(true);
+                                        }}
+                                        onBlur={() => setTimeout(() => setShowSchoolSuggestions(false), 200)}
+                                        placeholder="Enter school name..."
+                                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg 
+                                                 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none transition-colors"
+                                    />
+                                    
+                                    {/* School Suggestions Dropdown */}
+                                    {showSchoolSuggestions && schoolName && schoolSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-gray-700 border border-gray-600 
+                                                      rounded-lg shadow-xl z-10 max-h-48 overflow-y-auto">
+                                            <div className="p-2 text-xs text-gray-400 border-b border-gray-600">
+                                                Similar schools in {selectedCounty}:
+                                            </div>
+                                            {schoolSuggestions.map((school, index) => (
+                                                <button
+                                                    key={school._id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSchoolName(school.school_name);
+                                                        setShowSchoolSuggestions(false);
+                                                    }}
+                                                    className="w-full px-4 py-2 text-left text-white hover:bg-gray-600 
+                                                             transition-colors text-sm"
+                                                >
+                                                    {school.school_name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6">
-                                <div className="text-gray-400 text-sm mb-2">Active Schools</div>
-                                <div className="text-3xl font-bold text-white">-</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8">
-                        <h3 className="text-xl font-semibold text-white mb-6">Quick Actions</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Link 
-                                href="/admin/leaderboard"
-                                className="bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-xl p-6 
-                                         transition-all duration-200 group cursor-pointer"
+                            {/* Submit Button */}
+                            <button
+                                type="submit"
+                                disabled={createSchoolMutation.isPending || !schoolName.trim()}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 
+                                         rounded-lg transition-colors duration-200 disabled:opacity-50 
+                                         disabled:cursor-not-allowed flex items-center justify-center"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-lg font-medium text-white group-hover:text-blue-400 transition-colors">
-                                            View Admin Leaderboard
-                                        </div>
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            Access detailed leaderboard with admin controls
-                                        </div>
-                                    </div>
-                                    <div className="text-gray-400 group-hover:text-blue-400 transition-colors">
-                                        →
-                                    </div>
-                                </div>
-                            </Link>
-                            
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6 opacity-50 cursor-not-allowed">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-lg font-medium text-white">
-                                            Manage Questions
-                                        </div>
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            Coming soon...
-                                        </div>
-                                    </div>
-                                    <div className="text-gray-400">
-                                        →
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6 opacity-50 cursor-not-allowed">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-lg font-medium text-white">
-                                            Manage Users
-                                        </div>
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            Coming soon...
-                                        </div>
-                                    </div>
-                                    <div className="text-gray-400">
-                                        →
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="bg-gray-700 border border-gray-600 rounded-xl p-6 opacity-50 cursor-not-allowed">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-lg font-medium text-white">
-                                            Manage Schools
-                                        </div>
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            Coming soon...
-                                        </div>
-                                    </div>
-                                    <div className="text-gray-400">
-                                        →
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Recent Activity */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8">
-                        <h3 className="text-xl font-semibold text-white mb-6">Recent Activity</h3>
-                        <div className="text-gray-400 text-center py-8">
-                            No recent activity to display
+                                {createSchoolMutation.isPending ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating...
+                                    </>
+                                ) : (
+                                    'Create School'
+                                )}
+                            </button>
+                        </form>
+                        
+                        {/* Info Section */}
+                        <div className="mt-6 p-4 bg-gray-700/50 rounded-lg">
+                            <p className="text-sm text-gray-400">
+                                <strong>Total Schools:</strong> {schoolCount || 0} schools in the database
+                            </p>
+                            <p className="text-xs text-gray-500 mt-2">
+                                Tip: Start typing to see existing schools and avoid creating duplicates.
+                            </p>
                         </div>
                     </div>
                 </main>

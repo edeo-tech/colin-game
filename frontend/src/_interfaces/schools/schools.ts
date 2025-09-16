@@ -16,3 +16,33 @@ export interface SchoolCreateRequest {
 export interface BulkSchoolsCreateRequest {
   schools: SchoolCreateRequest[];
 }
+
+// List of counties in the Republic of Ireland
+export const IRISH_COUNTIES = [
+    'Dublin',
+    'Cork',
+    'Galway',
+    'Limerick',
+    'Waterford',
+    'Carlow',
+    'Cavan',
+    'Clare',
+    'Donegal',
+    'Kerry',
+    'Kildare',
+    'Kilkenny',
+    'Laois',
+    'Leitrim',
+    'Longford',
+    'Louth',
+    'Mayo',
+    'Meath',
+    'Monaghan',
+    'Offaly',
+    'Roscommon',
+    'Sligo',
+    'Tipperary',
+    'Westmeath',
+    'Wexford',
+    'Wicklow'
+].sort();
