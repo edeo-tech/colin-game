@@ -1,9 +1,16 @@
 'use client';
 
 import { useAuth } from '@/context/auth/AuthContext';
+import { useGetAllTimeLeaderboard, useGetDailyLeaderboard } from '@/_queries/leaderboard/leaderboard';
+import LeaderboardTable from '@/components/leaderboard/LeaderboardTable';
+import Link from 'next/link';
 
 export default function Leaderboards() {
     const { auth, logout, logoutLoading } = useAuth();
+
+    // Fetch leaderboards
+    const { data: allTimeLeaderboard, isLoading: allTimeLoading, error: allTimeError } = useGetAllTimeLeaderboard(10);
+    const { data: dailyLeaderboard, isLoading: dailyLoading, error: dailyError } = useGetDailyLeaderboard(10);
 
     const handleLogout = () => {
         logout();
@@ -19,14 +26,21 @@ export default function Leaderboards() {
 
     return (
         <div className="min-h-screen bg-gray-900">
+            {/* Navigation */}
             <nav className="bg-gray-800 border-b border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-4">
+                            <Link 
+                                href="/home"
+                                className="text-gray-400 hover:text-white transition-colors duration-200"
+                            >
+                                ←
+                            </Link>
                             <h1 className="text-xl font-semibold text-white">Leaderboards</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <span className="text-gray-300">Welcome, {auth.username}!</span>
+                            <span className="text-gray-300 hidden sm:block">Welcome, {auth.username}!</span>
                             <button
                                 onClick={handleLogout}
                                 disabled={logoutLoading}
@@ -39,14 +53,28 @@ export default function Leaderboards() {
                 </div>
             </nav>
 
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="px-4 py-6 sm:px-0">
-                    <div className="border-4 border-dashed border-gray-600 rounded-lg h-96 flex items-center justify-center">
-                        <div className="text-center">
-                            <h2 className="text-3xl font-bold text-white mb-4">This is the leaderboards page</h2>
-                        </div>
-                    </div>
-                </div>
+            <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+                {/* All-Time Leaderboard */}
+                <LeaderboardTable
+                    title="National All-Time"
+                    entries={allTimeLeaderboard || []}
+                    isLoading={allTimeLoading}
+                    error={allTimeError}
+                    currentUserId={auth?.id}
+                    emptyMessage="No all-time scores yet. Be the first to set a record!"
+                    icon="🏆"
+                />
+
+                {/* Daily Leaderboard */}
+                <LeaderboardTable
+                    title="National Daily"
+                    entries={dailyLeaderboard || []}
+                    isLoading={dailyLoading}
+                    error={dailyError}
+                    currentUserId={auth?.id}
+                    emptyMessage="No scores today yet. Be the first to play today!"
+                    icon="📅"
+                />
             </main>
         </div>
     );

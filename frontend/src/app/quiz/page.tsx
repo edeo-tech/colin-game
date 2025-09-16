@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import { useGetAllQuestions } from '@/_queries/questions/questions';
+import { useCreateLeaderboardEntry } from '@/_queries/leaderboard/leaderboard';
 import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, OrderQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
 import Link from 'next/link';
 import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoiceQuestion';
@@ -24,6 +25,9 @@ export default function Quiz() {
         if (!questionsData || questionsData.length === 0) return [];
         return [...questionsData].sort(() => Math.random() - 0.5);
     }, [questionsData]);
+
+    // Leaderboard mutation
+    const createLeaderboardEntryMutation = useCreateLeaderboardEntry();
 
     // Debug logging (commented out to prevent constant logging)
     // console.log('Quiz data:', { 
@@ -79,8 +83,16 @@ export default function Quiz() {
             return () => clearTimeout(timer);
         } else if (quizState === 'playing' && timeLeft === 0) {
             setQuizState('finished');
+            // Submit score to leaderboard when quiz finishes
+            if (auth) {
+                createLeaderboardEntryMutation.mutate({
+                    username: auth.username,
+                    user_id: auth.id,
+                    score: score
+                });
+            }
         }
-    }, [quizState, timeLeft]);
+    }, [quizState, timeLeft, score, auth, createLeaderboardEntryMutation]);
 
     // Play again
     const playAgain = () => {
