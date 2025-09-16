@@ -55,6 +55,11 @@ export default function MultipleChoiceQuestionComponent({
             setTimeout(() => {
                 onCorrectAnswer();
             }, 1000);
+        } else {
+            // Auto move to next question after delay for incorrect answers too
+            setTimeout(() => {
+                onContinue();
+            }, 2000); // Give a bit more time to read the explanation
         }
     };
 
@@ -149,24 +154,10 @@ export default function MultipleChoiceQuestionComponent({
                         </div>
                     </div>
 
-                    {/* Continue Button (only show for incorrect answers) */}
-                    {!isCorrect && (
-                        <button
-                            onClick={handleContinue}
-                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 
-                                     text-white font-medium rounded-xl transition-all duration-200 
-                                     transform active:scale-95"
-                        >
-                            Continue to Next Question
-                        </button>
-                    )}
-
-                    {/* Auto-continue message for correct answers */}
-                    {isCorrect && (
-                        <div className="text-center text-gray-400 text-sm">
-                            Moving to next question...
-                        </div>
-                    )}
+                    {/* Auto-continue message */}
+                    <div className="text-center text-gray-400 text-sm">
+                        Moving to next question...
+                    </div>
                 </div>
             )}
         </div>

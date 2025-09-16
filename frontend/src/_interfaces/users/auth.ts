@@ -7,6 +7,7 @@ export interface RegisterUser {
     last_lat: number;
     last_long: number;
     device_os: string;
+    school_id?: string;
 }
 
 export interface LoginUser {
@@ -32,4 +33,5 @@ export interface AuthenticatedUser {
     radius: number;
     is_banned: boolean;
     last_login?: string;
+    school_id?: string;
 }

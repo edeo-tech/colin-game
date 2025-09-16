@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import Link from 'next/link';
+import SchoolSelector from '@/components/SchoolSelector';
 
 export default function Register() {
     const { register, registerLoading, registerError } = useAuth();
@@ -12,7 +13,8 @@ export default function Register() {
         password: '',
         last_lat: 0,
         last_long: 0,
-        device_os: 'web'
+        device_os: 'web',
+        school_id: undefined as string | undefined
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -87,6 +89,19 @@ export default function Register() {
                                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Enter your password"
                             />
+                        </div>
+                        <div>
+                            <label htmlFor="school" className="block text-sm font-medium text-gray-300">
+                                School (Optional)
+                            </label>
+                            <SchoolSelector
+                                value={formData.school_id}
+                                onChange={(schoolId) => setFormData(prev => ({ ...prev, school_id: schoolId || undefined }))}
+                                className="mt-1"
+                            />
+                            <p className="mt-1 text-xs text-gray-400">
+                                Struggling to find your school? You can leave this empty.
+                            </p>
                         </div>
                     </div>
 

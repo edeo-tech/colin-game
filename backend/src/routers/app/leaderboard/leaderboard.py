@@ -1,14 +1,15 @@
 from fastapi import Request, HTTPException, APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from typing import List
+from typing import List, Optional
 
-from models.leaderboard.leaderboard import LeaderboardEntryCreate
+from models.leaderboard.leaderboard import ScoreSubmission
 from crud.leaderboard.leaderboard import (
-    create_leaderboard_entry,
-    get_all_time_leaderboard,
-    get_daily_leaderboard,
-    get_user_leaderboard_entries
+    process_quiz_score,
+    get_national_all_time,
+    get_national_by_date,
+    get_school_all_time,
+    get_school_by_date
 )
 from utils.__errors__.error_decorator_routes import error_decorator
 from authentication import Authorization
@@ -16,66 +17,91 @@ from authentication import Authorization
 router = APIRouter()
 auth = Authorization()
 
-@router.post('/create')
+# Score Submission Route
+@router.post('/submit-score')
 @error_decorator
-async def create_leaderboard_entry_route(
+async def submit_quiz_score(
     req: Request, 
-    entry: LeaderboardEntryCreate,
+    score_submission: ScoreSubmission,
     user_id: str = Depends(auth.auth_wrapper)
 ):
-    """Create a new leaderboard entry"""
-    # Ensure the user_id in the entry matches the authenticated user
-    if entry.user_id != user_id:
+    """Submit a quiz score - creates national entry and updates school entry if applicable"""
+    # Ensure the user_id in the submission matches the authenticated user
+    if score_submission.user_id != user_id:
         raise HTTPException(
             status_code=403, 
-            detail="Cannot create leaderboard entry for another user"
+            detail="Cannot submit score for another user"
         )
     
-    created_entry = await create_leaderboard_entry(req, entry)
+    result = await process_quiz_score(req, score_submission)
+    
+    if not result["success"]:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process quiz score: {'; '.join(result['errors'])}"
+        )
+    
     return JSONResponse(
         status_code=201,
-        content=jsonable_encoder(created_entry)
+        content=jsonable_encoder(result)
     )
 
-@router.get('/all-time')
+# National Leaderboard Routes
+@router.get('/national/all-time')
 @error_decorator
-async def get_all_time_leaderboard_route(
+async def get_national_all_time_route(
     req: Request,
-    limit: int = Query(10, ge=1, le=50, description="Number of top entries to return"),
+    limit: Optional[int] = Query(None, ge=1, description="Number of top entries to return (no limit if not specified)"),
     user_id: str = Depends(auth.auth_wrapper)
 ):
-    """Get the all-time leaderboard (highest score per unique user)"""
-    leaderboard = await get_all_time_leaderboard(req, limit=limit)
+    """Get the national all-time leaderboard (highest score per unique user)"""
+    leaderboard = await get_national_all_time(req, limit=limit)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder(leaderboard)
     )
 
-@router.get('/daily')
+@router.get('/national/date/{date}')
 @error_decorator
-async def get_daily_leaderboard_route(
+async def get_national_by_date_route(
     req: Request,
-    limit: int = Query(10, ge=1, le=50, description="Number of top entries to return"),
+    date: str,
+    limit: Optional[int] = Query(None, ge=1, description="Number of top entries to return (no limit if not specified)"),
     user_id: str = Depends(auth.auth_wrapper)
 ):
-    """Get today's leaderboard"""
-    leaderboard = await get_daily_leaderboard(req, limit=limit)
+    """Get national leaderboard for a specific date (YYYY-MM-DD format)"""
+    leaderboard = await get_national_by_date(req, date, limit=limit)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder(leaderboard)
     )
 
-@router.get('/user/{target_user_id}')
+# School Leaderboard Routes
+@router.get('/school/all-time')
 @error_decorator
-async def get_user_leaderboard_entries_route(
+async def get_school_all_time_route(
     req: Request,
-    target_user_id: str,
-    limit: int = Query(10, ge=1, le=50, description="Number of entries to return"),
+    limit: Optional[int] = Query(None, ge=1, description="Number of top entries to return (no limit if not specified)"),
     user_id: str = Depends(auth.auth_wrapper)
 ):
-    """Get a user's leaderboard entries"""
-    entries = await get_user_leaderboard_entries(req, target_user_id, limit=limit)
+    """Get the school all-time leaderboard (sum of all daily totals per school)"""
+    leaderboard = await get_school_all_time(req, limit=limit)
     return JSONResponse(
         status_code=200,
-        content=jsonable_encoder(entries)
+        content=jsonable_encoder(leaderboard)
+    )
+
+@router.get('/school/date/{date}')
+@error_decorator
+async def get_school_by_date_route(
+    req: Request,
+    date: str,
+    limit: Optional[int] = Query(None, ge=1, description="Number of top entries to return (no limit if not specified)"),
+    user_id: str = Depends(auth.auth_wrapper)
+):
+    """Get school leaderboard for a specific date (YYYY-MM-DD format)"""
+    leaderboard = await get_school_by_date(req, date, limit=limit)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(leaderboard)
     )

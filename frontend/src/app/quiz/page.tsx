@@ -1,33 +1,36 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/auth/AuthContext';
 import { useGetAllQuestions } from '@/_queries/questions/questions';
-import { useCreateLeaderboardEntry } from '@/_queries/leaderboard/leaderboard';
-import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, OrderQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
+import { useSubmitScore } from '@/_queries/leaderboard/leaderboard';
+import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
 import Link from 'next/link';
 import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoiceQuestion';
 import TrueFalseQuestionComponent from '@/components/questions/TrueFalseQuestion';
 import FillBlankQuestionComponent from '@/components/questions/FillBlankQuestion';
-import OrderQuestionComponent from '@/components/questions/OrderQuestion';
 import MatchQuestionComponent from '@/components/questions/MatchQuestion';
 
 type QuizState = 'waiting' | 'playing' | 'finished';
 
 export default function Quiz() {
     const { auth, logout, logoutLoading } = useAuth();
+    const queryClient = useQueryClient();
     
     // Fetch all questions and randomize them
     const { data: questionsData, isLoading: questionsLoading, error } = useGetAllQuestions();
     
-    // Randomize the order of all questions when they're loaded
+    // Filter out order questions and randomize the remaining questions
     const allQuestions = useMemo(() => {
         if (!questionsData || questionsData.length === 0) return [];
-        return [...questionsData].sort(() => Math.random() - 0.5);
+        // Filter out order type questions
+        const filteredQuestions = questionsData.filter(q => q.type !== 'order');
+        return [...filteredQuestions].sort(() => Math.random() - 0.5);
     }, [questionsData]);
 
-    // Leaderboard mutation
-    const createLeaderboardEntryMutation = useCreateLeaderboardEntry();
+    // Score submission mutation with query invalidation
+    const submitScoreMutation = useSubmitScore();
 
     // Debug logging (commented out to prevent constant logging)
     // console.log('Quiz data:', { 
@@ -85,14 +88,20 @@ export default function Quiz() {
             setQuizState('finished');
             // Submit score to leaderboard when quiz finishes
             if (auth) {
-                createLeaderboardEntryMutation.mutate({
+                submitScoreMutation.mutate({
                     username: auth.username,
                     user_id: auth.id,
-                    score: score
+                    score: score,
+                    school_id: auth.school_id // Include school_id if user has one
+                }, {
+                    onSuccess: () => {
+                        // Invalidate all leaderboard queries to refresh the data
+                        queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+                    }
                 });
             }
         }
-    }, [quizState, timeLeft, score, auth, createLeaderboardEntryMutation]);
+    }, [quizState, timeLeft, score, auth, submitScoreMutation, queryClient]);
 
     // Play again
     const playAgain = () => {
@@ -221,13 +230,6 @@ export default function Quiz() {
                                         onContinue={handleContinue}
                                     />
                                 )}
-                                {currentQuestion.type === 'order' && (
-                                    <OrderQuestionComponent
-                                        question={currentQuestion as OrderQuestion}
-                                        onCorrectAnswer={handleCorrectAnswer}
-                                        onContinue={handleContinue}
-                                    />
-                                )}
                                 {currentQuestion.type === 'match' && (
                                     <MatchQuestionComponent
                                         question={currentQuestion as MatchQuestion}
@@ -235,7 +237,7 @@ export default function Quiz() {
                                         onContinue={handleContinue}
                                     />
                                 )}
-                                {!['multiple_choice', 'true_false', 'fill_blank', 'order', 'match'].includes(currentQuestion.type) && (
+                                {!['multiple_choice', 'true_false', 'fill_blank', 'match'].includes(currentQuestion.type) && (
                                     <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 text-center">
                                         <div className="text-red-300">
                                             Error: Unknown question type &quot;{currentQuestion.type}&quot;

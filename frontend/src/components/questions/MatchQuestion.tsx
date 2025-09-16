@@ -97,8 +97,13 @@ export default function MatchQuestionComponent({
             setTimeout(() => {
                 onCorrectAnswer();
             }, 1500);
+        } else {
+            // Auto move to next question after delay for incorrect too
+            setTimeout(() => {
+                onContinue();
+            }, 2500); // Give more time to see what was wrong
         }
-    }, [matches.length, question.pairs, onCorrectAnswer]);
+    }, [matches.length, question.pairs, onCorrectAnswer, onContinue]);
 
     // Auto-submit when all pairs are matched
     useEffect(() => {
@@ -178,6 +183,11 @@ export default function MatchQuestionComponent({
                     setTimeout(() => {
                         setIsCorrect(false);
                         setShowResult(true);
+                        
+                        // Auto-navigate to next question after showing the wrong match
+                        setTimeout(() => {
+                            onContinue();
+                        }, 2500); // Give time to see what was wrong
                     }, 1000);
                 }
             }
@@ -340,24 +350,10 @@ export default function MatchQuestionComponent({
                         </div>
                     )}
 
-                    {/* Continue Button (only show for incorrect answers) */}
-                    {!isCorrect && (
-                        <button
-                            onClick={handleContinue}
-                            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 
-                                     text-white font-medium rounded-xl transition-all duration-200 
-                                     transform active:scale-95"
-                        >
-                            Continue to Next Question
-                        </button>
-                    )}
-
-                    {/* Auto-continue message for correct answers */}
-                    {isCorrect && (
-                        <div className="text-center text-gray-400 text-sm">
-                            Moving to next question...
-                        </div>
-                    )}
+                    {/* Auto-continue message */}
+                    <div className="text-center text-gray-400 text-sm">
+                        Moving to next question...
+                    </div>
                 </div>
             )}
         </div>

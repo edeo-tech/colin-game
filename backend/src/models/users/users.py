@@ -1,4 +1,5 @@
 from pydantic import Field, BaseModel
+from typing import Optional
 from datetime import datetime, timezone
 
 from models._base import MongoBaseModel
@@ -56,6 +57,10 @@ class User(MongoBaseModel):
     is_banned:bool = Field(
         default=False,
         description='Whether the user is banned'
+    )
+    school_id: Optional[str] = Field(
+        default=None,
+        description='The ID of the school the user attends (optional)'
     )
 
 
