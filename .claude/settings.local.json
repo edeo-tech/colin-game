@@ -7,7 +7,10 @@
       "Bash(npm run lint)",
       "Bash(timeout 30s npm run dev)",
       "Bash(npx next build:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(python:*)",
+      "Bash(source:*)",
+      "Bash(env/Scripts/python.exe -c \"from src.crud.questions.questions import get_questions_by_type; print(''Import successful'')\")"
     ],
     "deny": []
   }

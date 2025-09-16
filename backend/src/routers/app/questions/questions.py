@@ -99,6 +99,10 @@ async def get_questions_by_type_route(
         )
     
     questions = await get_questions_by_type(req, question_type, skip=skip, limit=limit)
+    print(f"DEBUG: Found {len(questions)} questions of type {question_type}")
+    for i, q in enumerate(questions[:2]):  # Log first 2 questions
+        print(f"DEBUG: Question {i}: {q}")
+    
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder(questions)
