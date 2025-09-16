@@ -119,3 +119,14 @@ export const useGetUserLeaderboardEntries = (userId: string, limit: number = 10)
         enabled: !!userId, // Only run if userId is provided
     });
 };
+
+// Test mutation for adding school scores
+export const useTestAddSchoolScore = () => {
+    return useMutation({
+        mutationFn: async ({ schoolId, scoreToAdd }: { schoolId: string; scoreToAdd: number }) => {
+            const response = await leaderboardApi.testAddSchoolScore(schoolId, scoreToAdd);
+            return response.data;
+        },
+        retry: 1,
+    });
+};

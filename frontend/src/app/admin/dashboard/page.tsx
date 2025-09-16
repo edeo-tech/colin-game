@@ -190,6 +190,30 @@ export default function AdminDashboard() {
                             </p>
                         </div>
                     </div>
+
+                    {/* Admin Tools */}
+                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                        <h3 className="text-xl font-semibold text-white mb-4">Admin Tools</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Link 
+                                href="/admin/leaderboard"
+                                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg 
+                                         transition-colors duration-200 text-center block"
+                            >
+                                <div className="font-medium mb-1">Live Leaderboards</div>
+                                <div className="text-sm opacity-90">View real-time leaderboards with animations</div>
+                            </Link>
+                            
+                            <Link 
+                                href="/admin/test-data"
+                                className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg 
+                                         transition-colors duration-200 text-center block"
+                            >
+                                <div className="font-medium mb-1">Test Data Generator</div>
+                                <div className="text-sm opacity-90">Create fake leaderboard entries for testing</div>
+                            </Link>
+                        </div>
+                    </div>
                 </main>
             </div>
         </AdminGuard>

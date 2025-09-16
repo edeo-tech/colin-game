@@ -247,7 +247,7 @@ export default function LeaderboardSection({
                     {searchTerm && (
                         <span>Showing {filteredData.length} matching entries • </span>
                     )}
-                    Updates every 10 seconds
+                    {/* Updates every 10 seconds */}
                 </div>
             )}
         </div>

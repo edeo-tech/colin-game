@@ -77,6 +77,14 @@ class LeaderboardApi {
         
         return axiosConfig.protectedApi.get(`${BASE_PATH}/user/${userId}?${searchParams.toString()}`);
     }
+
+    // Test endpoint for adding scores directly to schools
+    testAddSchoolScore(schoolId: string, scoreToAdd: number) {
+        return axiosConfig.protectedApi.post(`${BASE_PATH}/test/school-score`, {
+            school_id: schoolId,
+            score_to_add: scoreToAdd
+        });
+    }
 }
 
 const leaderboardApi = new LeaderboardApi();

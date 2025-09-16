@@ -2,6 +2,7 @@ from fastapi import Request, HTTPException, APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional
+from pydantic import BaseModel
 
 from models.leaderboard.leaderboard import ScoreSubmission
 from crud.leaderboard.leaderboard import (
@@ -104,4 +105,78 @@ async def get_school_by_date_route(
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder(leaderboard)
+    )
+
+# Test endpoint for admin - directly update school scores
+class TestSchoolScore(BaseModel):
+    school_id: str
+    score_to_add: int
+
+@router.post('/test/school-score')
+@error_decorator
+async def test_add_school_score(
+    req: Request,
+    test_data: TestSchoolScore,
+    user_id: str = Depends(auth.auth_wrapper)
+):
+    """Test endpoint: Add score directly to a school's leaderboard (Admin only)"""
+    from crud.schools.schools import getSchoolById
+    from crud._generic import _db_actions
+    from models.leaderboard.leaderboard import SchoolLeaderboard
+    from datetime import datetime, timezone
+    
+    # Get school info
+    school = await getSchoolById(req, test_data.school_id)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    
+    # Get today's date
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    
+    # Check if school already has an entry for today
+    existing_entry = await _db_actions.getDocument(
+        req=req,
+        collection_name='school_leaderboard',
+        BaseModel=SchoolLeaderboard,
+        school_id=test_data.school_id,
+        date=today
+    )
+    
+    if existing_entry:
+        # Update existing entry
+        new_total = existing_entry.total_score + test_data.score_to_add
+        await _db_actions.updateDocument(
+            req=req,
+            collection_name='school_leaderboard',
+            BaseModel=SchoolLeaderboard,
+            document_id=existing_entry.id,
+            total_score=new_total,
+            updated_at=datetime.now(timezone.utc)
+        )
+        existing_entry.total_score = new_total
+        result_entry = existing_entry
+    else:
+        # Create new entry
+        new_entry = SchoolLeaderboard(
+            school_id=test_data.school_id,
+            school_name=school.school_name,
+            total_score=test_data.score_to_add,
+            user_count=1,  # Fake user count for testing
+            date=today
+        )
+        
+        result_entry = await _db_actions.createDocument(
+            req=req,
+            collection_name='school_leaderboard',
+            BaseModel=SchoolLeaderboard,
+            new_document=new_entry
+        )
+    
+    return JSONResponse(
+        status_code=201,
+        content=jsonable_encoder({
+            "success": True,
+            "school_entry": result_entry,
+            "message": f"Added {test_data.score_to_add} points to {school.school_name}"
+        })
     )

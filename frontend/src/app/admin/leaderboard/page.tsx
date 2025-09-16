@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth/AuthContext';
+// import { useAuth } from '@/context/auth/AuthContext';
 import AdminGuard from '@/components/auth/AdminGuard';
-import Link from 'next/link';
+// import Link from 'next/link';
 import LeaderboardSection from '@/components/leaderboard/LeaderboardSection';
 import { useAdminNationalLeaderboard, useAdminSchoolLeaderboard } from '@/_queries/leaderboard/admin-leaderboard';
 
 export default function AdminLeaderboard() {
-    const { auth, logout, logoutLoading } = useAuth();
+    // const { auth, logout, logoutLoading } = useAuth();
     
     // Date states for each leaderboard
     const [nationalDate, setNationalDate] = useState<string | null>(null);
@@ -18,22 +18,22 @@ export default function AdminLeaderboard() {
     const { 
         data: nationalData, 
         isLoading: nationalLoading 
-    } = useAdminNationalLeaderboard(nationalDate, 50); // Get top 50
+    } = useAdminNationalLeaderboard(nationalDate); // No limit
     
     const { 
         data: schoolData, 
         isLoading: schoolLoading 
-    } = useAdminSchoolLeaderboard(schoolDate, 50); // Get top 50
+    } = useAdminSchoolLeaderboard(schoolDate); // No limit
 
-    const handleLogout = () => {
-        logout();
-    };
+    // const handleLogout = () => {
+    //     logout();
+    // };
 
     return (
         <AdminGuard>
             <div className="min-h-screen bg-gray-900">
                 {/* Navigation */}
-                <nav className="bg-gray-800 border-b border-gray-700">
+                {/* <nav className="bg-gray-800 border-b border-gray-700">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between h-16">
                             <div className="flex items-center space-x-4">
@@ -61,37 +61,40 @@ export default function AdminLeaderboard() {
                             </div>
                         </div>
                     </div>
-                </nav>
+                </nav> */}
 
                 {/* Main Content */}
-                <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+                <main className="max-w-[1400px] mx-auto px-4 py-8">
                     {/* Header Section */}
-                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                    {/* <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-2">Live Admin Leaderboards</h2>
                         <p className="text-gray-300 text-sm">
                             Real-time leaderboards with 10-second auto-refresh. Use Ctrl+F to search within each leaderboard.
                         </p>
+                    </div> */}
+
+                    {/* Leaderboards Grid */}
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        {/* National Leaderboard */}
+                        <LeaderboardSection
+                            title="🏆 National Leaderboard"
+                            data={nationalData || []}
+                            type="national"
+                            isLoading={nationalLoading}
+                            selectedDate={nationalDate}
+                            onDateChange={setNationalDate}
+                        />
+
+                        {/* School Leaderboard */}
+                        <LeaderboardSection
+                            title="🏫 School Leaderboard"
+                            data={schoolData || []}
+                            type="school"
+                            isLoading={schoolLoading}
+                            selectedDate={schoolDate}
+                            onDateChange={setSchoolDate}
+                        />
                     </div>
-
-                    {/* National Leaderboard */}
-                    <LeaderboardSection
-                        title="🏆 National Leaderboard"
-                        data={nationalData || []}
-                        type="national"
-                        isLoading={nationalLoading}
-                        selectedDate={nationalDate}
-                        onDateChange={setNationalDate}
-                    />
-
-                    {/* School Leaderboard */}
-                    <LeaderboardSection
-                        title="🏫 School Leaderboard"
-                        data={schoolData || []}
-                        type="school"
-                        isLoading={schoolLoading}
-                        selectedDate={schoolDate}
-                        onDateChange={setSchoolDate}
-                    />
                 </main>
             </div>
         </AdminGuard>
