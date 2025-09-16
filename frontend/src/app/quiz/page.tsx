@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
-import { useGetQuestionsByType } from '@/_queries/questions/questions';
-import { Question, MatchQuestion } from '@/_interfaces/questions/questions';
+import { useGetAllQuestions } from '@/_queries/questions/questions';
+import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, OrderQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
 import Link from 'next/link';
+import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoiceQuestion';
+import TrueFalseQuestionComponent from '@/components/questions/TrueFalseQuestion';
+import FillBlankQuestionComponent from '@/components/questions/FillBlankQuestion';
+import OrderQuestionComponent from '@/components/questions/OrderQuestion';
 import MatchQuestionComponent from '@/components/questions/MatchQuestion';
 
 type QuizState = 'waiting' | 'playing' | 'finished';
@@ -12,8 +16,14 @@ type QuizState = 'waiting' | 'playing' | 'finished';
 export default function Quiz() {
     const { auth, logout, logoutLoading } = useAuth();
     
-    // Fetch match questions only
-    const { data: allQuestions, isLoading: questionsLoading, error } = useGetQuestionsByType('match');
+    // Fetch all questions and randomize them
+    const { data: questionsData, isLoading: questionsLoading, error } = useGetAllQuestions();
+    
+    // Randomize the order of all questions when they're loaded
+    const allQuestions = useMemo(() => {
+        if (!questionsData || questionsData.length === 0) return [];
+        return [...questionsData].sort(() => Math.random() - 0.5);
+    }, [questionsData]);
 
     // Debug logging (commented out to prevent constant logging)
     // console.log('Quiz data:', { 
@@ -176,20 +186,59 @@ export default function Quiz() {
                         </div>
 
                         {/* Current Question Component */}
-                        {currentQuestion && currentQuestion.type === 'match' ? (
-                            <MatchQuestionComponent
-                                question={currentQuestion as MatchQuestion}
-                                onCorrectAnswer={handleCorrectAnswer}
-                                onContinue={handleContinue}
-                            />
+                        {currentQuestion ? (
+                            <>
+                                {currentQuestion.type === 'multiple_choice' && (
+                                    <MultipleChoiceQuestionComponent
+                                        question={currentQuestion as MultipleChoiceQuestion}
+                                        onCorrectAnswer={handleCorrectAnswer}
+                                        onContinue={handleContinue}
+                                    />
+                                )}
+                                {currentQuestion.type === 'true_false' && (
+                                    <TrueFalseQuestionComponent
+                                        question={currentQuestion as TrueFalseQuestion}
+                                        onCorrectAnswer={handleCorrectAnswer}
+                                        onContinue={handleContinue}
+                                    />
+                                )}
+                                {currentQuestion.type === 'fill_blank' && (
+                                    <FillBlankQuestionComponent
+                                        question={currentQuestion as FillBlankQuestion}
+                                        onCorrectAnswer={handleCorrectAnswer}
+                                        onContinue={handleContinue}
+                                    />
+                                )}
+                                {currentQuestion.type === 'order' && (
+                                    <OrderQuestionComponent
+                                        question={currentQuestion as OrderQuestion}
+                                        onCorrectAnswer={handleCorrectAnswer}
+                                        onContinue={handleContinue}
+                                    />
+                                )}
+                                {currentQuestion.type === 'match' && (
+                                    <MatchQuestionComponent
+                                        question={currentQuestion as MatchQuestion}
+                                        onCorrectAnswer={handleCorrectAnswer}
+                                        onContinue={handleContinue}
+                                    />
+                                )}
+                                {!['multiple_choice', 'true_false', 'fill_blank', 'order', 'match'].includes(currentQuestion.type) && (
+                                    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 text-center">
+                                        <div className="text-red-300">
+                                            Error: Unknown question type "{currentQuestion.type}"
+                                        </div>
+                                        <pre className="mt-2 text-xs text-gray-400">
+                                            {JSON.stringify(currentQuestion, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 text-center">
                                 <div className="text-red-300">
-                                    Error: Invalid question type or no question available
+                                    Error: No question available
                                 </div>
-                                <pre className="mt-2 text-xs text-gray-400">
-                                    {JSON.stringify(currentQuestion, null, 2)}
-                                </pre>
                             </div>
                         )}
                     </>
