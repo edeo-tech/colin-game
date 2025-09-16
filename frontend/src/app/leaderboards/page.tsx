@@ -75,7 +75,10 @@ export default function Leaderboards() {
                             <h1 className="text-xl font-semibold text-white">Leaderboards</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <span className="text-gray-300 hidden sm:block">Welcome, {auth.username}!</span>
+                            <span className="text-gray-300 hidden sm:block">
+                                Welcome, {auth.username}! 
+                                <span className="text-gray-400 text-sm ml-2">({auth.role})</span>
+                            </span>
                             <button
                                 onClick={handleLogout}
                                 disabled={logoutLoading}

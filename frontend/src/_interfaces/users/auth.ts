@@ -1,3 +1,5 @@
+import { UserRole } from './user-role';
+
 export interface RegisterUser {
     username: string;
     email: string;
@@ -34,4 +36,5 @@ export interface AuthenticatedUser {
     is_banned: boolean;
     last_login?: string;
     school_id?: string;
+    role: UserRole;
 }

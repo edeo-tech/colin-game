@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from models._base import MongoBaseModel
+from models.users.user_role import UserRole
 
 
 class User(MongoBaseModel):
@@ -61,6 +62,10 @@ class User(MongoBaseModel):
     school_id: Optional[str] = Field(
         default=None,
         description='The ID of the school the user attends (optional)'
+    )
+    role: UserRole = Field(
+        default=UserRole.USER,
+        description='The role of the user (USER or ADMIN)'
     )
 
 
