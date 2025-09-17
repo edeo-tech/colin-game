@@ -13,7 +13,8 @@ export interface LeaderboardEntryData {
     school_name?: string;
     county?: string;
     score: number;
-    [key: string]: unknown;
+    type?: 'national' | 'school';
+    user_count?: number;
 }
 
 interface AnimatedLeaderboardEntryProps {
