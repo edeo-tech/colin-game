@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from models.users.users import User
 from models.users.authenticated_user import AuthenticatedUser
+from models.schools.school import School
 from crud._generic import _db_actions
 
 from authentication import Authorization
@@ -15,11 +16,65 @@ from utils.strings.username_sanitation import remove_invalid_username_characters
 auth = Authorization()
 
 
+async def generate_username(req: Request, school_id: str = None) -> str:
+    try:
+        if school_id:
+            # Get school to extract school name
+            school = await _db_actions.getDocument(
+                req=req,
+                collection_name='schools',
+                BaseModel=School,
+                id=school_id
+            )
+            
+            if school:
+                # Count users from this school
+                school_user_count = await _db_actions.countDocuments(
+                    req=req,
+                    collection_name='users',
+                    BaseModel=User,
+                    school_id=school_id
+                )
+                
+                # Clean school name: remove spaces and punctuation
+                clean_school_name = ''.join(c for c in school.school_name if c.isalnum()).lower()
+                username = f"student_{school_user_count + 1}_{clean_school_name}"
+            else:
+                # Fallback if school not found
+                total_user_count = await _db_actions.countAllDocuments(
+                    req=req,
+                    collection_name='users',
+                    BaseModel=User
+                )
+                username = f"student_{total_user_count + 1}"
+        else:
+            # No school selected - use total user count
+            total_user_count = await _db_actions.countAllDocuments(
+                req=req,
+                collection_name='users',
+                BaseModel=User
+            )
+            username = f"student_{total_user_count + 1}"
+        
+        return username
+    except Exception as e:
+        # Fallback to simple numbering if anything fails
+        print(f"Error generating username: {e}")
+        total_user_count = await _db_actions.countAllDocuments(
+            req=req,
+            collection_name='users',
+            BaseModel=User
+        )
+        return f"student_{total_user_count + 1}"
+
+
 async def create_user(req:Request, user:User):
+    ## Generate username automatically
+    user.username = await generate_username(req, user.school_id)
+    
     ## check that username is not already taken - keep adding underscores until it is not taken
     while await check_if_username_is_taken(req, user.username):
         user.username += '_'
-
 
     ## strip username of any invalid characters
     user.username = remove_invalid_username_characters(user.username)

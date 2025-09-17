@@ -7,8 +7,8 @@ from models.users.user_role import UserRole
 
 
 class User(MongoBaseModel):
-    username:str = Field(
-        ...,
+    username: Optional[str] = Field(
+        default=None,
         description='The username of the user'
     )
     email:str = Field(

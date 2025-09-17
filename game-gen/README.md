@@ -67,3 +67,7 @@ export default tseslint.config([
   },
 ])
 ```
+
+
+
+Okay, big change required around registering. Letting user's input their own usernames is not viable, so this needs to be removed from the register screen (the username field) - but we still need to create a username for them for the leaderboard. So we suggest if they provided a school, count the number of user from that school, and make username, student_{number+1}_{school_name} (where school name has no spaces or punctuation), or if no school selected, simply student_{number+1}, where in this case number is the total users in the database (count total user documents). Can you make this change? Cheers

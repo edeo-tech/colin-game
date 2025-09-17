@@ -88,7 +88,7 @@ export default function AdminLeaderboard() {
                 </div>
 
                 {/* Main Content */}
-                <main className="max-w-[1400px] mx-auto px-4 py-8">
+                <main className="max-w-[1400px] mx-auto px-4 py-8 pb-[400px]">
                     {/* Leaderboards Grid */}
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         {/* National Leaderboard */}
