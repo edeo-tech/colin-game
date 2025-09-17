@@ -91,7 +91,7 @@ export default function Leaderboards() {
                 </div>
             </nav>
 
-            <main className="max-w-7xl mx-auto px-4 py-6">
+            <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
                 {/* Filters */}
                 <div className="mb-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -138,7 +138,7 @@ export default function Leaderboards() {
                 </div>
 
                 {/* Leaderboards Container */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                     {/* National Leaderboard */}
                     <LeaderboardTable
                         title={`National ${useDateFilter ? 'Daily' : 'All-Time'}`}

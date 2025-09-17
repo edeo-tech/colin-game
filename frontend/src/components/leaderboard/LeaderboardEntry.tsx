@@ -13,13 +13,9 @@ export default function LeaderboardEntryComponent({
     position, 
     isCurrentUser = false 
 }: LeaderboardEntryProps) {
-    const getPositionIcon = (pos: number) => {
-        switch (pos) {
-            case 1: return '🥇';
-            case 2: return '🥈';
-            case 3: return '🥉';
-            default: return `#${pos}`;
-        }
+    const truncateText = (text: string, maxLength: number = 15) => {
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
     };
 
     const getPositionStyles = (pos: number) => {
@@ -45,38 +41,39 @@ export default function LeaderboardEntryComponent({
 
     return (
         <div className={`
-            flex items-center justify-between p-4 rounded-xl border transition-all duration-200
+            flex items-center justify-between p-2 sm:p-4 rounded-xl border transition-all duration-200
             ${getPositionStyles(position)}
             ${isCurrentUser ? 'ring-2 ring-blue-400' : ''}
             hover:scale-[1.02] transform
         `}>
             {/* Position and Username */}
-            <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg">
-                    {getPositionIcon(position)}
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg">
+                    #{position}
                 </div>
-                <div className="flex-1">
-                    <div className="font-semibold text-lg">
-                        {entry.username}
+                <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm sm:text-lg truncate">
+                        <span className="sm:hidden">{truncateText(entry.username, 15)}</span>
+                        <span className="hidden sm:inline">{entry.username}</span>
                         {isCurrentUser && (
-                            <span className="ml-2 text-sm bg-blue-500 px-2 py-1 rounded-full">
+                            <span className="ml-1 sm:ml-2 text-xs sm:text-sm bg-blue-500 px-1 sm:px-2 py-1 rounded-full">
                                 You
                             </span>
                         )}
                     </div>
-                    <div className="text-sm opacity-75">
+                    <div className="text-xs sm:text-sm opacity-75 truncate">
                         {formatDate(entry.created_at)}
                     </div>
                 </div>
             </div>
 
             {/* Score */}
-            <div className="text-right">
-                <div className="text-2xl font-bold">
+            <div className="text-right flex-shrink-0 ml-2">
+                <div className="text-lg sm:text-2xl font-bold">
                     {entry.score}
                 </div>
-                <div className="text-sm opacity-75">
-                    {entry.score === 1 ? 'point' : 'points'}
+                <div className="text-xs sm:text-sm opacity-75">
+                    {entry.score === 1 ? 'pt' : 'pts'}
                 </div>
             </div>
         </div>

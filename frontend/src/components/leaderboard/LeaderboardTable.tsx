@@ -30,18 +30,18 @@ export default function LeaderboardTable({
                     <h2 className="text-2xl font-bold text-white">{title}</h2>
                 </div>
                 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                     {[...Array(5)].map((_, index) => (
                         <div key={`loading-skeleton-${index}`} className="animate-pulse">
-                            <div className="flex items-center justify-between p-4 bg-gray-700 rounded-xl">
-                                <div className="flex items-center space-x-4">
-                                    <div className="w-12 h-12 bg-gray-600 rounded-full"></div>
+                            <div className="flex items-center justify-between p-2 sm:p-4 bg-gray-700 rounded-xl">
+                                <div className="flex items-center space-x-2 sm:space-x-4">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gray-600 rounded-full"></div>
                                     <div className="space-y-2">
-                                        <div className="h-4 bg-gray-600 rounded w-24"></div>
-                                        <div className="h-3 bg-gray-600 rounded w-16"></div>
+                                        <div className="h-3 sm:h-4 bg-gray-600 rounded w-20 sm:w-24"></div>
+                                        <div className="h-2 sm:h-3 bg-gray-600 rounded w-12 sm:w-16"></div>
                                     </div>
                                 </div>
-                                <div className="h-6 bg-gray-600 rounded w-12"></div>
+                                <div className="h-5 sm:h-6 bg-gray-600 rounded w-10 sm:w-12"></div>
                             </div>
                         </div>
                     ))}
@@ -80,7 +80,7 @@ export default function LeaderboardTable({
 
             {/* Leaderboard Entries */}
             {entries && entries.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                     {entries.map((entry, index) => (
                         <LeaderboardEntryComponent
                             key={entry.id}
