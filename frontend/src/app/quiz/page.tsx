@@ -110,7 +110,7 @@ export default function Quiz() {
                 });
             }
         }
-    }, [quizState, timeLeft, score, auth, submitScoreMutation, queryClient]);
+    }, [quizState, timeLeft, score, auth, submitScoreMutation, queryClient, playSound]);
 
     // Play again
     const playAgain = () => {
@@ -294,7 +294,7 @@ export default function Quiz() {
                             <div className="space-y-2">
                                 <h3 className="text-xl font-bold text-white">🚀 GET YOUR SCHOOL UP THE LEADERBOARD</h3>
                                 <p className="text-purple-200 font-medium">SHARE WITH FRIENDS!</p>
-                                <p className="text-sm text-gray-300">Every point counts towards your school's ranking</p>
+                                <p className="text-sm text-gray-300">Every point counts towards your school&apos;s ranking</p>
                             </div>
                             <button
                                 onClick={() => setShowShareModal(true)}

@@ -132,10 +132,6 @@ export default function OrderQuestionComponent({
         }
     };
 
-    const handleContinue = () => {
-        onContinue();
-    };
-
     const getCorrectOrderText = () => {
         return question.correctOrder.map(index => question.items[index]).join(' → ');
     };

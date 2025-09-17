@@ -108,7 +108,7 @@ export default function MatchQuestionComponent({
                 onContinue();
             }, 2500); // Give more time to see what was wrong
         }
-    }, [matches.length, question.pairs, onCorrectAnswer, onContinue]);
+    }, [matches.length, question.pairs, onCorrectAnswer, onContinue, playSound]);
 
     // Auto-submit when all pairs are matched
     useEffect(() => {
@@ -202,10 +202,6 @@ export default function MatchQuestionComponent({
             
             setSelectedItem(null);
         }
-    };
-
-    const handleContinue = () => {
-        onContinue();
     };
 
     const getItemStyles = (item: MatchItem) => {

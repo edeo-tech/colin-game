@@ -12,7 +12,7 @@ export interface LeaderboardEntryData {
     username?: string;
     school_name?: string;
     score: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface AnimatedLeaderboardEntryProps {

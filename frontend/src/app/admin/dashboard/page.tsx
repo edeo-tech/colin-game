@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import AdminGuard from '@/components/auth/AdminGuard';
 import Link from 'next/link';
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
                                             <div className="p-2 text-xs text-gray-400 border-b border-gray-600">
                                                 Similar schools in {selectedCounty}:
                                             </div>
-                                            {schoolSuggestions.map((school, index) => (
+                                            {schoolSuggestions.map((school) => (
                                                 <button
                                                     key={school._id}
                                                     type="button"

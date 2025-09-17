@@ -68,10 +68,6 @@ export default function MultipleChoiceQuestionComponent({
         }
     };
 
-    const handleContinue = () => {
-        onContinue();
-    };
-
     return (
         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-6">
             {/* Question Header */}

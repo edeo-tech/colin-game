@@ -225,7 +225,7 @@ export default function AdminTestData() {
                         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
                             <h3 className="text-xl font-semibold text-white mb-4">Add School Score</h3>
                             <p className="text-gray-400 text-sm mb-4">
-                                Directly add points to a school's leaderboard total for testing animations.
+                                Directly add points to a school&apos;s leaderboard total for testing animations.
                             </p>
                             
                             <form onSubmit={handleSchoolSubmit} className="space-y-4">
@@ -282,7 +282,7 @@ export default function AdminTestData() {
                         <h3 className="text-lg font-semibold text-blue-400 mb-3">Testing Instructions</h3>
                         <div className="space-y-2 text-sm text-gray-300">
                             <p>• Open the admin leaderboard in another tab to see real-time updates</p>
-                            <p>• Use "Quick Test" to see multiple entries animate in sequence</p>
+                            <p>• Use &quot;Quick Test&quot; to see multiple entries animate in sequence</p>
                             <p>• Add individual entries with different scores to test position changes</p>
                             <p>• Create entries for the same user/school with higher scores to see ranking updates</p>
                             <p>• The leaderboard updates every 10 seconds automatically</p>

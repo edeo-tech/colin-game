@@ -10,18 +10,18 @@ interface AdminGuardProps {
 }
 
 export default function AdminGuard({ children }: AdminGuardProps) {
-    const { auth, loading } = useAuth();
+    const { auth, authLoading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
         // Redirect if not admin after loading is complete
-        if (!loading && (!auth || auth.role !== UserRole.ADMIN)) {
+        if (!authLoading && (!auth || auth.role !== UserRole.ADMIN)) {
             router.push('/home');
         }
-    }, [auth, loading, router]);
+    }, [auth, authLoading, router]);
 
     // Show loading state while checking auth
-    if (loading) {
+    if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-900">
                 <div className="text-white">Loading...</div>
@@ -35,7 +35,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
             <div className="min-h-screen flex items-center justify-center bg-gray-900">
                 <div className="text-center">
                     <div className="text-red-400 text-xl mb-4">Access Denied</div>
-                    <div className="text-gray-300">You don't have permission to view this page.</div>
+                    <div className="text-gray-300">You don&apos;t have permission to view this page.</div>
                 </div>
             </div>
         );
