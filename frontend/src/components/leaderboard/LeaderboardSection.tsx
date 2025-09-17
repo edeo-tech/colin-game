@@ -35,7 +35,7 @@ export default function LeaderboardSection({
             if (type === 'national') {
                 const nationalEntry = entry as NationalLeaderboardEntry;
                 return {
-                    id: nationalEntry._id,
+                    id: nationalEntry.id,
                     position: index + 1,
                     username: nationalEntry.username,
                     score: nationalEntry.score,
@@ -46,7 +46,7 @@ export default function LeaderboardSection({
             } else {
                 const schoolEntry = entry as SchoolLeaderboardEntry;
                 return {
-                    id: schoolEntry._id,
+                    id: schoolEntry.id,
                     position: index + 1,
                     school_name: schoolEntry.school_name,
                     score: schoolEntry.total_score,
@@ -58,6 +58,7 @@ export default function LeaderboardSection({
             }
         });
     }, [data, type]);
+
 
     // Track position changes and new entries
     useEffect(() => {
@@ -79,7 +80,7 @@ export default function LeaderboardSection({
 
             setNewEntries(currentNewEntries);
             
-            // Clear new entries after animation
+            // Clear new entries after animation to ensure they can trigger again next polling cycle
             const timer = setTimeout(() => {
                 setNewEntries(new Set());
             }, 2000);
@@ -88,14 +89,19 @@ export default function LeaderboardSection({
         }
     }, [transformedData, previousPositions]);
 
-    // Update previous positions after each data change
+    // Update previous positions after tracking new entries, with a delay to ensure animations complete
     useEffect(() => {
         if (transformedData && transformedData.length > 0) {
-            const positions = new Map<string, number>();
-            transformedData.forEach((entry) => {
-                positions.set(entry.id, entry.position);
-            });
-            setPreviousPositions(positions);
+            // Delay updating previous positions to ensure current animation cycle completes
+            const timer = setTimeout(() => {
+                const positions = new Map<string, number>();
+                transformedData.forEach((entry) => {
+                    positions.set(entry.id, entry.position);
+                });
+                setPreviousPositions(positions);
+            }, 100); // Small delay to ensure current animations are processed first
+            
+            return () => clearTimeout(timer);
         }
     }, [transformedData]);
 

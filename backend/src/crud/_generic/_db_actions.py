@@ -192,10 +192,13 @@ async def getDocument(
     
     query = {}
     # Handle direct model fields
+    print(f"getDocument called with collection: {collection_name}, kwargs: {kwargs}")
+    print(f"BaseModel fields: {[(name, field.alias) for name, field in BaseModel.model_fields.items()]}")
     for field_name, field in BaseModel.model_fields.items():
         param_value = kwargs.get(field.alias, kwargs.get(field_name))
         if param_value is not None:
             query[field.alias if field.alias else field_name] = param_value
+            print(f"Added to query: {field.alias if field.alias else field_name} = {param_value}")
             
     # Handle embedded fields with double underscore notation
     for key, value in kwargs.items():
@@ -204,6 +207,7 @@ async def getDocument(
             mongo_key = key.replace("__", ".")
             query[mongo_key] = value
             
+    print(f"Final query built: {query}")
     if not query:
         raise CustomException(
             message="None or invalid query parameters provided - get failed",

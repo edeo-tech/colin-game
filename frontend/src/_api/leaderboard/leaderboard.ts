@@ -85,6 +85,24 @@ class LeaderboardApi {
             score_to_add: scoreToAdd
         });
     }
+
+    // Admin APIs
+    addBonusPoints(entryId: string, bonusPoints: number, entryType: 'national' | 'school') {
+        return axiosConfig.protectedApi.post(`${BASE_PATH}/admin/bonus-points`, {
+            entry_id: entryId,
+            bonus_points: bonusPoints,
+            entry_type: entryType
+        });
+    }
+
+    deleteEntry(entryId: string, entryType: 'national' | 'school') {
+        return axiosConfig.protectedApi.delete(`${BASE_PATH}/admin/entry`, {
+            data: {
+                entry_id: entryId,
+                entry_type: entryType
+            }
+        });
+    }
 }
 
 const leaderboardApi = new LeaderboardApi();

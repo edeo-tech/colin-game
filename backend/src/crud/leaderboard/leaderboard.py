@@ -30,15 +30,37 @@ async def get_national_all_time(req: Request, limit: Optional[int] = None) -> Li
     """Get highest score per user for all time"""
     
     pipeline = [
-        # Group by user_id and get the maximum score for each user
+        # Group by user_id and get the document with maximum score for each user
         {
             "$group": {
                 "_id": "$user_id",
-                "max_score": {"$max": "$score"},
-                "username": {"$first": "$username"},
-                "user_id": {"$first": "$user_id"},
-                "created_at": {"$first": "$created_at"},
-                "updated_at": {"$first": "$updated_at"}
+                "top_score_doc": {
+                    "$top": {
+                        "output": {
+                            "score": "$score",
+                            "id": "$_id",
+                            "username": "$username",
+                            "user_id": "$user_id",
+                            "created_at": "$created_at",
+                            "updated_at": "$updated_at"
+                        },
+                        "sortBy": {"score": -1}
+                    }
+                }
+            }
+        },
+        # Flatten the structure
+        {
+            "$replaceRoot": {
+                "newRoot": {
+                    "_id": "$_id",
+                    "max_score": "$top_score_doc.score",
+                    "username": "$top_score_doc.username",
+                    "user_id": "$top_score_doc.user_id",
+                    "id": "$top_score_doc.id",
+                    "created_at": "$top_score_doc.created_at",
+                    "updated_at": "$top_score_doc.updated_at"
+                }
             }
         },
         # Sort by max_score in descending order
@@ -49,6 +71,7 @@ async def get_national_all_time(req: Request, limit: Optional[int] = None) -> Li
                 "_id": {"$toString": "$_id"},
                 "username": 1,
                 "user_id": 1,
+                "id": 1,
                 "score": "$max_score",
                 "created_at": 1,
                 "updated_at": 1
@@ -84,15 +107,37 @@ async def get_national_by_date(req: Request, date_str: str, limit: Optional[int]
                 }
             }
         },
-        # Group by user_id and get the maximum score for each user on this date
+        # Group by user_id and get the document with maximum score for each user on this date
         {
             "$group": {
                 "_id": "$user_id",
-                "max_score": {"$max": "$score"},
-                "username": {"$first": "$username"},
-                "user_id": {"$first": "$user_id"},
-                "created_at": {"$first": "$created_at"},
-                "updated_at": {"$first": "$updated_at"}
+                "top_score_doc": {
+                    "$top": {
+                        "output": {
+                            "score": "$score",
+                            "id": "$_id",
+                            "username": "$username",
+                            "user_id": "$user_id",
+                            "created_at": "$created_at",
+                            "updated_at": "$updated_at"
+                        },
+                        "sortBy": {"score": -1}
+                    }
+                }
+            }
+        },
+        # Flatten the structure
+        {
+            "$replaceRoot": {
+                "newRoot": {
+                    "_id": "$_id",
+                    "max_score": "$top_score_doc.score",
+                    "username": "$top_score_doc.username",
+                    "user_id": "$top_score_doc.user_id",
+                    "id": "$top_score_doc.id",
+                    "created_at": "$top_score_doc.created_at",
+                    "updated_at": "$top_score_doc.updated_at"
+                }
             }
         },
         # Sort by max_score in descending order
@@ -103,6 +148,7 @@ async def get_national_by_date(req: Request, date_str: str, limit: Optional[int]
                 "_id": {"$toString": "$_id"},
                 "username": 1,
                 "user_id": 1,
+                "id": 1,
                 "score": "$max_score",
                 "created_at": 1,
                 "updated_at": 1
@@ -166,6 +212,8 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
     """Get all-time school leaderboard (sum of all daily totals per school)"""
     
     pipeline = [
+        # Sort by created_at to ensure consistent ordering for $first
+        {"$sort": {"created_at": 1}},
         # Group by school_id and sum all daily totals
         {
             "$group": {
@@ -174,6 +222,7 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
                 "total_user_count": {"$sum": "$user_count"},
                 "school_name": {"$first": "$school_name"},
                 "school_id": {"$first": "$school_id"},
+                "id": {"$first": "$_id"},  # This will be the first (oldest) document's ID
                 "created_at": {"$first": "$created_at"},
                 "updated_at": {"$first": "$updated_at"}
             }
@@ -186,6 +235,7 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
                 "_id": {"$toString": "$_id"},
                 "school_id": 1,
                 "school_name": 1,
+                "id": 1,
                 "total_score": 1,
                 "user_count": "$total_user_count",
                 "created_at": 1,
@@ -257,7 +307,7 @@ async def process_quiz_score(req: Request, score_submission: ScoreSubmission) ->
             req=req,
             collection_name="users",
             BaseModel=User,
-            _id=score_submission.user_id
+            id=score_submission.user_id
         )
         
         print("--------------------------------")
@@ -277,7 +327,7 @@ async def process_quiz_score(req: Request, score_submission: ScoreSubmission) ->
                 req=req,
                 collection_name="schools",
                 BaseModel=School,
-                _id=user_school_id
+                id=user_school_id
             )
             
             if school:
@@ -295,6 +345,150 @@ async def process_quiz_score(req: Request, score_submission: ScoreSubmission) ->
         else:
             print("User has no school_id")
                 
+    except Exception as e:
+        result["success"] = False
+        result["errors"].append(str(e))
+    
+    return result
+
+# Admin Functions
+async def add_bonus_points_to_entry(req: Request, entry_id: str, bonus_points: int, entry_type: str) -> dict:
+    """Add bonus points to a leaderboard entry (admin only)"""
+    
+    result = {
+        "success": True,
+        "updated_entry": None,
+        "errors": []
+    }
+    
+    try:
+        if entry_type == "national":
+            # Get the current entry
+            existing_entry = await _db_actions.getDocument(
+                req=req,
+                collection_name='national_leaderboard',
+                BaseModel=NationalLeaderboard,
+                id=entry_id
+            )
+            
+            if not existing_entry:
+                result["success"] = False
+                result["errors"].append("National leaderboard entry not found")
+                return result
+            
+            # Update with bonus points
+            new_score = existing_entry.score + bonus_points
+            updated_entry = await _db_actions.updateDocument(
+                req=req,
+                collection_name='national_leaderboard',
+                BaseModel=NationalLeaderboard,
+                document_id=entry_id,
+                score=new_score,
+                updated_at=datetime.now(timezone.utc)
+            )
+            result["updated_entry"] = updated_entry
+            
+        elif entry_type == "school":
+            # Get the current entry
+            existing_entry = await _db_actions.getDocument(
+                req=req,
+                collection_name='school_leaderboard',
+                BaseModel=SchoolLeaderboard,
+                id=entry_id
+            )
+            
+            if not existing_entry:
+                result["success"] = False
+                result["errors"].append("School leaderboard entry not found")
+                return result
+            
+            # Update with bonus points
+            new_total_score = existing_entry.total_score + bonus_points
+            updated_entry = await _db_actions.updateDocument(
+                req=req,
+                collection_name='school_leaderboard',
+                BaseModel=SchoolLeaderboard,
+                document_id=entry_id,
+                total_score=new_total_score,
+                updated_at=datetime.now(timezone.utc)
+            )
+            result["updated_entry"] = updated_entry
+            
+        else:
+            result["success"] = False
+            result["errors"].append("Invalid entry type. Must be 'national' or 'school'")
+            
+    except Exception as e:
+        result["success"] = False
+        result["errors"].append(str(e))
+    
+    print("--------------------------------")
+    print("Result:", result)
+    print("--------------------------------")
+    return result
+
+async def delete_leaderboard_entry(req: Request, entry_id: str, entry_type: str) -> dict:
+    """Delete a leaderboard entry (admin only)"""
+    
+    print(f"delete_leaderboard_entry called with entry_id: {entry_id}, type: {type(entry_id)}")
+    print(f"entry_type: {entry_type}")
+    
+    result = {
+        "success": True,
+        "deleted_entry_id": entry_id,
+        "errors": []
+    }
+    
+    try:
+        if entry_type == "national":
+            # Check if entry exists
+            existing_entry = await _db_actions.getDocument(
+                req=req,
+                collection_name='national_leaderboard',
+                BaseModel=NationalLeaderboard,
+                id=entry_id
+            )
+            
+            if not existing_entry:
+                result["success"] = False
+                result["errors"].append("National leaderboard entry not found")
+                return result
+            
+            # Delete the entry
+            await _db_actions.deleteDocument(
+                req=req,
+                collection_name='national_leaderboard',
+                BaseModel=NationalLeaderboard,
+                id=entry_id
+            )
+            
+        elif entry_type == "school":
+            # Check if entry exists
+            print("entry_id:", entry_id)
+            existing_entry = await _db_actions.getDocument(
+                req=req,
+                collection_name='school_leaderboard',
+                BaseModel=SchoolLeaderboard,
+                id=entry_id
+            )
+            
+            if not existing_entry:
+                result["success"] = False
+                result["errors"].append("School leaderboard entry not found")
+                return result
+            
+            # Delete the entry
+            await _db_actions.deleteDocument(
+                req=req,
+                collection_name='school_leaderboard',
+                BaseModel=SchoolLeaderboard,
+                id=entry_id
+            )
+            
+        else:
+            result["success"] = False
+            result["errors"].append("Invalid entry type. Must be 'national' or 'school'")
+            
     except Exception as e:
         result["success"] = False
         result["errors"].append(str(e))

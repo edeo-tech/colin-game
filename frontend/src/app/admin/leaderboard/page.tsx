@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // import { useAuth } from '@/context/auth/AuthContext';
 import AdminGuard from '@/components/auth/AdminGuard';
 // import Link from 'next/link';
@@ -19,11 +19,19 @@ export default function AdminLeaderboard() {
         data: nationalData, 
         isLoading: nationalLoading 
     } = useAdminNationalLeaderboard(nationalDate); // No limit
+
+    useEffect(() => {
+        console.log("National Data:", nationalData);
+    }, [nationalData]);
     
     const { 
         data: schoolData, 
         isLoading: schoolLoading 
     } = useAdminSchoolLeaderboard(schoolDate); // No limit
+
+    useEffect(() => {
+        console.log("School Data:", schoolData);
+    }, [schoolData]);
 
     // const handleLogout = () => {
     //     logout();

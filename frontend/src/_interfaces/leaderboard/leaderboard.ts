@@ -1,6 +1,7 @@
 // National Leaderboard Entry
 export interface NationalLeaderboardEntry {
     _id: string;
+    id: string;
     username: string;
     user_id: string;
     score: number;
@@ -11,6 +12,7 @@ export interface NationalLeaderboardEntry {
 // School Leaderboard Entry
 export interface SchoolLeaderboardEntry {
     _id: string;
+    id: string;
     school_id: string;
     school_name: string;
     total_score: number;

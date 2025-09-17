@@ -10,7 +10,9 @@ from crud.leaderboard.leaderboard import (
     get_national_all_time,
     get_national_by_date,
     get_school_all_time,
-    get_school_by_date
+    get_school_by_date,
+    add_bonus_points_to_entry,
+    delete_leaderboard_entry
 )
 from utils.__errors__.error_decorator_routes import error_decorator
 from authentication import Authorization
@@ -179,4 +181,107 @@ async def test_add_school_score(
             "school_entry": result_entry,
             "message": f"Added {test_data.score_to_add} points to {school.school_name}"
         })
+    )
+
+# Admin Models
+class BonusPointsRequest(BaseModel):
+    entry_id: str
+    bonus_points: int
+    entry_type: str  # "national" or "school"
+
+class DeleteEntryRequest(BaseModel):
+    entry_id: str
+    entry_type: str  # "national" or "school"
+
+# Admin Endpoints
+@router.post('/admin/bonus-points')
+@error_decorator
+async def add_bonus_points(
+    req: Request,
+    bonus_data: BonusPointsRequest,
+    user_id: str = Depends(auth.auth_wrapper)
+):
+    """Add bonus points to a leaderboard entry (Admin only)"""
+    print(f"Adding bonus points to entry {bonus_data.entry_id} with {bonus_data.bonus_points} points, leaderboard type {bonus_data.entry_type}")
+    
+    # Check if user is admin
+    is_admin = await auth.check_admin_role(req, user_id)
+    if not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+    
+    # Validate entry type
+    if bonus_data.entry_type not in ["national", "school"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid entry type. Must be 'national' or 'school'"
+        )
+    
+    result = await add_bonus_points_to_entry(
+        req=req,
+        entry_id=bonus_data.entry_id,
+        bonus_points=bonus_data.bonus_points,
+        entry_type=bonus_data.entry_type
+    )
+    
+    if not result["success"]:
+        raise HTTPException(
+            status_code=404 if "not found" in "; ".join(result["errors"]).lower() else 500,
+            detail=f"Failed to add bonus points: {'; '.join(result['errors'])}"
+        )
+    
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(result)
+    )
+
+@router.delete('/admin/entry')
+@error_decorator
+async def delete_entry(
+    req: Request,
+    delete_data: DeleteEntryRequest,
+    user_id: str = Depends(auth.auth_wrapper)
+):
+    """Delete a leaderboard entry (Admin only)"""
+    
+    print("Delete endpoint called")
+    print(f"Delete data received: {delete_data}")
+    print(f"Entry ID: {delete_data.entry_id}")
+    print(f"Entry type: {delete_data.entry_type}")
+    
+    # Check if user is admin
+    is_admin = await auth.check_admin_role(req, user_id)
+    if not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin access required"
+        )
+    
+    # Validate entry type
+    if delete_data.entry_type not in ["national", "school"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid entry type. Must be 'national' or 'school'"
+        )
+    
+    result = await delete_leaderboard_entry(
+        req=req,
+        entry_id=delete_data.entry_id,
+        entry_type=delete_data.entry_type
+    )
+
+    print("--------------------------------")
+    print("Result:", result)
+    print("--------------------------------")
+    if not result["success"]:
+        raise HTTPException(
+            status_code=404 if "not found" in "; ".join(result["errors"]).lower() else 500,
+            detail=f"Failed to delete entry: {'; '.join(result['errors'])}"
+        )
+    
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(result)
     )

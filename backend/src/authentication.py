@@ -114,3 +114,25 @@ class Authorization:
     async def logout(self, req:Request, user_id:str):
         await req.app.mongodb['refresh_tokens'].delete_many({'user_id': user_id})
     
+    async def check_admin_role(self, req: Request, user_id: str) -> bool:
+        """Check if user has admin role"""
+        from models.users.users import User
+        from crud._generic import _db_actions
+        
+        try:
+            user = await _db_actions.getDocument(
+                req=req,
+                collection_name="users",
+                BaseModel=User,
+                id=user_id
+            )
+            
+            if not user:
+                return False
+                
+            from models.users.user_role import UserRole
+            return user.role == UserRole.ADMIN
+            
+        except Exception:
+            return False
+    
