@@ -8,7 +8,6 @@ import SchoolSelector from '@/components/SchoolSelector';
 export default function Register() {
     const { register, registerLoading, registerError } = useAuth();
     const [formData, setFormData] = useState({
-        username: '',
         email: '',
         password: '',
         last_lat: 0,
@@ -45,21 +44,6 @@ export default function Register() {
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
-                        <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-gray-300">
-                                Username
-                            </label>
-                            <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                required
-                                value={formData.username}
-                                onChange={handleChange}
-                                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your username"
-                            />
-                        </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-300">
                                 Email address
@@ -100,7 +84,7 @@ export default function Register() {
                                 className="mt-1"
                             />
                             <p className="mt-1 text-xs text-gray-400">
-                                Struggling to find your school? You can leave this empty.
+                                Struggling to find your school? Ask Colin or Ross to add it.
                             </p>
                         </div>
                     </div>

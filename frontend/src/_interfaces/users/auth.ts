@@ -1,7 +1,7 @@
 import { UserRole } from './user-role';
 
 export interface RegisterUser {
-    username: string;
+    username?: string;
     email: string;
     password: string;
     profile_picture?: string;

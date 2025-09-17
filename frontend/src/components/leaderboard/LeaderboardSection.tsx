@@ -49,6 +49,7 @@ export default function LeaderboardSection({
                     id: schoolEntry.id,
                     position: index + 1,
                     school_name: schoolEntry.school_name,
+                    county: schoolEntry.county,
                     score: schoolEntry.total_score,
                     school_id: schoolEntry.school_id,
                     user_count: schoolEntry.user_count,

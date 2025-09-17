@@ -15,6 +15,7 @@ export interface SchoolLeaderboardEntry {
     id: string;
     school_id: string;
     school_name: string;
+    county: string;
     total_score: number;
     user_count: number;
     created_at: string;

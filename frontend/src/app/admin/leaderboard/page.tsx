@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AdminGuard from '@/components/auth/AdminGuard';
 import LeaderboardSection from '@/components/leaderboard/LeaderboardSection';
@@ -11,6 +11,7 @@ export default function AdminLeaderboard() {
     // Date states for each leaderboard
     const [nationalDate, setNationalDate] = useState<string | null>(null);
     const [schoolDate, setSchoolDate] = useState<string | null>(null);
+    const [isClient, setIsClient] = useState(false);
     
     // Leaderboard data
     const { 
@@ -25,6 +26,11 @@ export default function AdminLeaderboard() {
 
     // Particle animation for background
     const particles = Array.from({ length: 20 }, (_, i) => i);
+    
+    // Only run on client side to avoid SSR issues
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     return (
         <AdminGuard>
@@ -32,17 +38,17 @@ export default function AdminLeaderboard() {
                 {/* Animated Background */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 animate-pulse" />
-                    {particles.map((particle) => (
+                    {isClient && particles.map((particle) => (
                         <motion.div
                             key={particle}
                             className="absolute w-2 h-2 bg-cyan-400 rounded-full"
                             initial={{
-                                x: Math.random() * window.innerWidth,
-                                y: Math.random() * window.innerHeight,
+                                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+                                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
                                 opacity: Math.random() * 0.5 + 0.3
                             }}
                             animate={{
-                                y: [null, Math.random() * window.innerHeight],
+                                y: [null, Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800)],
                                 opacity: [null, Math.random() * 0.8 + 0.2]
                             }}
                             transition={{
@@ -213,7 +219,7 @@ export default function AdminLeaderboard() {
                             transition={{ duration: 0.8, delay: 0.3 }}
                         >
                             <LeaderboardSection
-                                title="🏆 TOP PLAYERS"
+                                title="🏆 TOP PLAYERS (BEST SCORE)"
                                 data={nationalData || []}
                                 type="national"
                                 isLoading={nationalLoading}
@@ -229,7 +235,7 @@ export default function AdminLeaderboard() {
                             transition={{ duration: 0.8, delay: 0.5 }}
                         >
                             <LeaderboardSection
-                                title="🏫 TOP SCHOOLS"
+                                title="🏫 TOP SCHOOLS (TOTAL SCORE)"
                                 data={schoolData || []}
                                 type="school"
                                 isLoading={schoolLoading}

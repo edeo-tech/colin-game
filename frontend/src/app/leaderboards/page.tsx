@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import { 
     useGetNationalAllTime, 
@@ -8,6 +8,7 @@ import {
     useGetSchoolAllTime, 
     useGetSchoolByDate 
 } from '@/_queries/leaderboard/leaderboard';
+import { UserRole } from '@/_interfaces/users/user-role';
 import LeaderboardTable from '@/components/leaderboard/LeaderboardTable';
 import Link from 'next/link';
 
@@ -30,6 +31,13 @@ export default function Leaderboards() {
         useGetSchoolAllTime();
     const { data: schoolByDate, isLoading: schoolByDateLoading, error: schoolByDateError } = 
         useGetSchoolByDate(useDateFilter ? (selectedDate || today) : '', undefined);
+    
+    useEffect(() => {
+        console.log("National All Time:", nationalAllTime);
+        console.log("National By Date:", nationalByDate);
+        console.log("School All Time:", schoolAllTime);
+        console.log("School By Date:", schoolByDate);
+    }, [nationalAllTime, nationalByDate, schoolAllTime, schoolByDate]);
 
     const handleLogout = () => {
         logout();
@@ -79,13 +87,15 @@ export default function Leaderboards() {
                                 Welcome, {auth.username}! 
                                 <span className="text-gray-400 text-sm ml-2">({auth.role})</span>
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                disabled={logoutLoading}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {logoutLoading ? 'Logging out...' : 'Logout'}
-                            </button>
+                            {auth.role === UserRole.ADMIN && (
+                                <button
+                                    onClick={handleLogout}
+                                    disabled={logoutLoading}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {logoutLoading ? 'Logging out...' : 'Logout'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -162,7 +172,7 @@ export default function Leaderboards() {
                         entries={schoolData?.map((entry, index) => ({
                             id: entry._id || `school-${index}`,
                             _id: entry._id,
-                            username: entry.school_name,
+                            username: `${entry.school_name}${entry.county ? ` (${entry.county})` : ''}`,
                             user_id: entry.school_id,
                             score: entry.total_score,
                             created_at: entry.created_at,

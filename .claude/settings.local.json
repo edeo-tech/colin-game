@@ -11,7 +11,8 @@
       "Bash(python:*)",
       "Bash(source:*)",
       "Bash(env/Scripts/python.exe -c \"from src.crud.questions.questions import get_questions_by_type; print(''Import successful'')\")",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

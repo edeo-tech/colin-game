@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth/AuthContext';
 import { useGetAllQuestions } from '@/_queries/questions/questions';
 import { useSubmitScore } from '@/_queries/leaderboard/leaderboard';
 import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
+import { UserRole } from '@/_interfaces/users/user-role';
 import Link from 'next/link';
 import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoiceQuestion';
 import TrueFalseQuestionComponent from '@/components/questions/TrueFalseQuestion';
@@ -150,13 +151,15 @@ export default function Quiz() {
                                 Welcome, {auth.username}! 
                                 <span className="text-gray-400 text-sm ml-2">({auth.role})</span>
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                disabled={logoutLoading}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {logoutLoading ? 'Logging out...' : 'Logout'}
-                            </button>
+                            {auth.role === UserRole.ADMIN && (
+                                <button
+                                    onClick={handleLogout}
+                                    disabled={logoutLoading}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {logoutLoading ? 'Logging out...' : 'Logout'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -359,6 +362,39 @@ export default function Quiz() {
                             >
                                 Back to Home
                             </Link>
+                        </div>
+
+                        {/* Game Generation Promotion */}
+                        <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-6 space-y-3">
+                            <div className="text-center space-y-2">
+                                <p className="text-gray-200 text-lg">
+                                    This game was generated on{' '}
+                                    <Link
+                                        href={(() => {
+                                            const baseUrl = 'https://edugamegen.netlify.app';
+                                            if (!auth) return baseUrl;
+                                            
+                                            const params = new URLSearchParams();
+                                            if (auth.username) params.append('username', auth.username);
+                                            if (auth.email) params.append('email', auth.email);
+                                            
+                                            // Get school name from localStorage
+                                            const schoolName = localStorage.getItem('selectedSchoolName');
+                                            if (schoolName) params.append('school', schoolName);
+                                            
+                                            return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+                                        })()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-green-400 hover:text-green-300 underline font-semibold transition-colors"
+                                    >
+                                        edugamegen.netlify.app
+                                    </Link>
+                                </p>
+                                <p className="text-gray-300 font-medium">
+                                    Create more games like this for all subjects now!
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )}
