@@ -227,6 +227,33 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
                 "updated_at": {"$first": "$updated_at"}
             }
         },
+        # Lookup school details to get county
+        {
+            "$lookup": {
+                "from": "schools",
+                "let": {"schoolIdStr": "$school_id"},
+                "pipeline": [
+                    {
+                        "$match": {
+                            "$expr": {
+                                "$or": [
+                                    {"$eq": ["$_id", {"$toObjectId": "$$schoolIdStr"}]},
+                                    {"$eq": [{"$toString": "$_id"}, "$$schoolIdStr"]}
+                                ]
+                            }
+                        }
+                    },
+                    {"$project": {"county": 1}}
+                ],
+                "as": "school_details"
+            }
+        },
+        # Add county field from lookup result
+        {
+            "$addFields": {
+                "county": {"$arrayElemAt": ["$school_details.county", 0]}
+            }
+        },
         # Sort by total_score in descending order
         {"$sort": {"total_score": -1}},
         # Reshape the output
@@ -235,6 +262,7 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
                 "_id": {"$toString": "$_id"},
                 "school_id": 1,
                 "school_name": 1,
+                "county": 1,
                 "id": 1,
                 "total_score": 1,
                 "user_count": "$total_user_count",
@@ -249,6 +277,12 @@ async def get_school_all_time(req: Request, limit: Optional[int] = None) -> List
         pipeline.insert(-1, {"$limit": limit})
     
     results = await req.app.mongodb['school_leaderboard'].aggregate(pipeline).to_list(length=None)
+    
+    # Debug: Print first result to see what's happening
+    if results:
+        print("get_school_all_time - First result with county lookup:")
+        print(results[0])
+    
     return results
 
 async def get_school_by_date(req: Request, date_str: str, limit: Optional[int] = None) -> List[dict]:
@@ -262,23 +296,74 @@ async def get_school_by_date(req: Request, date_str: str, limit: Optional[int] =
     except (ValueError, TypeError):
         raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
     
-    # Get entries from the specified date
-    entries = await _db_actions.getMultipleDocuments(
-        req=req,
-        collection_name='school_leaderboard',
-        BaseModel=SchoolLeaderboard,
-        order_by='total_score',
-        order_direction=_db_actions.SortDirection.DESCENDING,
-        limit=limit or 0,
-        skip=0,
-        created_at={
-            '$gte': start_of_day,
-            '$lte': end_of_day
+    # Use aggregation pipeline to include county information
+    pipeline = [
+        # Filter by date range
+        {
+            "$match": {
+                "created_at": {
+                    "$gte": start_of_day,
+                    "$lte": end_of_day
+                }
+            }
+        },
+        # Lookup school details to get county
+        {
+            "$lookup": {
+                "from": "schools",
+                "let": {"schoolIdStr": "$school_id"},
+                "pipeline": [
+                    {
+                        "$match": {
+                            "$expr": {
+                                "$or": [
+                                    {"$eq": ["$_id", {"$toObjectId": "$$schoolIdStr"}]},
+                                    {"$eq": [{"$toString": "$_id"}, "$$schoolIdStr"]}
+                                ]
+                            }
+                        }
+                    },
+                    {"$project": {"county": 1}}
+                ],
+                "as": "school_details"
+            }
+        },
+        # Add county field from lookup result
+        {
+            "$addFields": {
+                "county": {"$arrayElemAt": ["$school_details.county", 0]}
+            }
+        },
+        # Sort by total_score in descending order
+        {"$sort": {"total_score": -1}},
+        # Reshape the output
+        {
+            "$project": {
+                "_id": {"$toString": "$_id"},
+                "school_id": 1,
+                "school_name": 1,
+                "county": 1,
+                "id": 1,
+                "total_score": 1,
+                "user_count": 1,
+                "created_at": 1,
+                "updated_at": 1
+            }
         }
-    )
+    ]
     
-    # Convert to dict format
-    return [entry.model_dump() if hasattr(entry, 'model_dump') else entry for entry in entries]
+    # Add limit if specified
+    if limit:
+        pipeline.append({"$limit": limit})
+    
+    results = await req.app.mongodb['school_leaderboard'].aggregate(pipeline).to_list(length=None)
+    
+    # Debug: Print first result to see what's happening
+    if results:
+        print("get_school_by_date - First result with county lookup:")
+        print(results[0])
+    
+    return results
 
 # Combined Score Processing Function
 async def process_quiz_score(req: Request, score_submission: ScoreSubmission) -> dict:

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth/AuthContext';
 import { 
     useGetNationalAllTime, 
@@ -31,6 +31,13 @@ export default function Leaderboards() {
         useGetSchoolAllTime();
     const { data: schoolByDate, isLoading: schoolByDateLoading, error: schoolByDateError } = 
         useGetSchoolByDate(useDateFilter ? (selectedDate || today) : '', undefined);
+    
+    useEffect(() => {
+        console.log("National All Time:", nationalAllTime);
+        console.log("National By Date:", nationalByDate);
+        console.log("School All Time:", schoolAllTime);
+        console.log("School By Date:", schoolByDate);
+    }, [nationalAllTime, nationalByDate, schoolAllTime, schoolByDate]);
 
     const handleLogout = () => {
         logout();
@@ -165,7 +172,7 @@ export default function Leaderboards() {
                         entries={schoolData?.map((entry, index) => ({
                             id: entry._id || `school-${index}`,
                             _id: entry._id,
-                            username: entry.school_name,
+                            username: `${entry.school_name}${entry.county ? ` (${entry.county})` : ''}`,
                             user_id: entry.school_id,
                             score: entry.total_score,
                             created_at: entry.created_at,

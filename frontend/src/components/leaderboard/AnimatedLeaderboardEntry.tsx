@@ -11,6 +11,7 @@ export interface LeaderboardEntryData {
     position: number;
     username?: string;
     school_name?: string;
+    county?: string;
     score: number;
     [key: string]: unknown;
 }
@@ -198,8 +199,15 @@ export default function AnimatedLeaderboardEntry({
                     </div>
                     
                     {/* Name */}
-                    <div className="text-lg font-semibold text-white">
-                        {type === 'national' ? entry.username : entry.school_name}
+                    <div>
+                        <div className="text-lg font-semibold text-white">
+                            {type === 'national' ? entry.username : entry.school_name}
+                        </div>
+                        {type === 'school' && entry.county && (
+                            <div className="text-sm text-gray-400">
+                                {entry.county}
+                            </div>
+                        )}
                     </div>
                 </div>
                 
