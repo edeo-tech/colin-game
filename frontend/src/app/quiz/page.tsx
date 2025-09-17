@@ -202,19 +202,39 @@ export default function Quiz() {
                 {quizState === 'playing' && currentQuestion && (
                     <>
                         {/* Timer and Score Header */}
-                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-                            <div className="flex justify-between items-center">
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-white">{timeLeft}</div>
-                                    <div className="text-sm text-gray-400">seconds</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-blue-400">{score}</div>
-                                    <div className="text-sm text-gray-400">score</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-yellow-400">{questionCount + 1}</div>
-                                    <div className="text-sm text-gray-400">question</div>
+                        <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+                            {/* Animated Progress Bar Background */}
+                            <div className="relative">
+                                <div 
+                                    className="h-2 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 transition-all duration-1000 ease-linear"
+                                    style={{ 
+                                        width: `${((60 - timeLeft) / 60) * 100}%`,
+                                        transition: timeLeft === 60 ? 'none' : 'width 1s linear'
+                                    }}
+                                />
+                                <div className="absolute inset-0 h-2 bg-gray-700" style={{ zIndex: -1 }} />
+                            </div>
+                            
+                            {/* Stats Content */}
+                            <div className="p-6">
+                                <div className="flex justify-between items-center">
+                                    <div className="text-center">
+                                        <div className={`text-2xl font-bold transition-colors duration-500 ${
+                                            timeLeft <= 10 ? 'text-red-400 animate-pulse' : 
+                                            timeLeft <= 20 ? 'text-yellow-400' : 'text-green-400'
+                                        }`}>
+                                            {timeLeft}
+                                        </div>
+                                        <div className="text-sm text-gray-400">seconds</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-blue-400">{score}</div>
+                                        <div className="text-sm text-gray-400">score</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-yellow-400">{questionCount + 1}</div>
+                                        <div className="text-sm text-gray-400">question</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
