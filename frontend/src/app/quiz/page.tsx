@@ -360,6 +360,39 @@ export default function Quiz() {
                                 Back to Home
                             </Link>
                         </div>
+
+                        {/* Game Generation Promotion */}
+                        <div className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-xl p-6 space-y-3">
+                            <div className="text-center space-y-2">
+                                <p className="text-gray-200 text-lg">
+                                    This game was generated on{' '}
+                                    <Link
+                                        href={(() => {
+                                            const baseUrl = 'https://edugamegen.netlify.app';
+                                            if (!auth) return baseUrl;
+                                            
+                                            const params = new URLSearchParams();
+                                            if (auth.username) params.append('username', auth.username);
+                                            if (auth.email) params.append('email', auth.email);
+                                            
+                                            // Get school name from localStorage
+                                            const schoolName = localStorage.getItem('selectedSchoolName');
+                                            if (schoolName) params.append('school', schoolName);
+                                            
+                                            return params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+                                        })()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-green-400 hover:text-green-300 underline font-semibold transition-colors"
+                                    >
+                                        edugamegen.netlify.app
+                                    </Link>
+                                </p>
+                                <p className="text-gray-300 font-medium">
+                                    Create more games like this for all subjects now!
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </main>

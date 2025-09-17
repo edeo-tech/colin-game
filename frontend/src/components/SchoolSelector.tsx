@@ -72,6 +72,9 @@ export default function SchoolSelector({
         setSearchTerm(school.school_name);
         onChange(school._id);
         setIsOpen(false);
+        
+        // Store school name in localStorage for game generation links
+        localStorage.setItem('selectedSchoolName', school.school_name);
     };
 
     const handleClearSelection = () => {
@@ -79,6 +82,9 @@ export default function SchoolSelector({
         setSearchTerm('');
         onChange(null);
         setIsOpen(false);
+        
+        // Remove school name from localStorage when cleared
+        localStorage.removeItem('selectedSchoolName');
     };
 
     return (
