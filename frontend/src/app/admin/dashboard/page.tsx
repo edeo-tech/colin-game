@@ -65,11 +65,14 @@ export default function AdminDashboard() {
                             <div className="flex items-center space-x-4">
                                 <Link 
                                     href="/home"
-                                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                                    className="flex items-center"
                                 >
-                                    ←
+                                    <img 
+                                        src="/sgs_logo.png" 
+                                        alt="SGS Logo" 
+                                        className="h-10 w-10 hover:opacity-80 transition-opacity duration-200" 
+                                    />
                                 </Link>
-                                <h1 className="text-xl font-semibold text-white">Admin Dashboard</h1>
                                 <span className="text-yellow-500 text-sm bg-yellow-900/20 px-2 py-1 rounded">ADMIN</span>
                             </div>
                             <div className="flex items-center space-x-4">

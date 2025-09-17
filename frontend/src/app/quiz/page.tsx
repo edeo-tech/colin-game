@@ -140,11 +140,14 @@ export default function Quiz() {
                         <div className="flex items-center space-x-4">
                             <Link 
                                 href="/home"
-                                className="text-gray-400 hover:text-white transition-colors duration-200"
+                                className="flex items-center"
                             >
-                                ←
+                                <img 
+                                    src="/sgs_logo.png" 
+                                    alt="SGS Logo" 
+                                    className="h-10 w-10 hover:opacity-80 transition-opacity duration-200" 
+                                />
                             </Link>
-                            <h1 className="text-xl font-semibold text-white">Quiz</h1>
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-gray-300 hidden sm:block">

@@ -118,12 +118,15 @@ export default function AdminTestData() {
                         <div className="flex justify-between h-16">
                             <div className="flex items-center space-x-4">
                                 <Link 
-                                    href="/admin/leaderboard"
-                                    className="text-gray-400 hover:text-white transition-colors duration-200"
+                                    href="/home"
+                                    className="flex items-center"
                                 >
-                                    ←
+                                    <img 
+                                        src="/sgs_logo.png" 
+                                        alt="SGS Logo" 
+                                        className="h-10 w-10 hover:opacity-80 transition-opacity duration-200" 
+                                    />
                                 </Link>
-                                <h1 className="text-xl font-semibold text-white">Test Data Generator</h1>
                                 <span className="text-yellow-500 text-sm bg-yellow-900/20 px-2 py-1 rounded">ADMIN</span>
                             </div>
                             <div className="flex items-center space-x-4">

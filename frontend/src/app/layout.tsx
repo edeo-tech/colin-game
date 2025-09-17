@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Higher Options Game",
   description: "Math Game",
+  icons: {
+    icon: "/sgs_logo.png",
+    shortcut: "/sgs_logo.png",
+    apple: "/sgs_logo.png",
+  },
 };
 
 export default function RootLayout({
