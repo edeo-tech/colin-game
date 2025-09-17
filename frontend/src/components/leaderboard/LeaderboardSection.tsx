@@ -157,20 +157,42 @@ export default function LeaderboardSection({
             
             <div className="relative bg-gradient-to-br from-gray-800/95 via-gray-900/95 to-black/95 border border-cyan-500/30 rounded-3xl p-6 backdrop-blur-sm">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <motion.h3 
-                        className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500"
-                        style={{ 
-                            textShadow: '0 0 20px rgba(6, 182, 212, 0.3)',
-                            fontFamily: 'system-ui, -apple-system, sans-serif'
-                        }}
-                        animate={{ 
-                            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-                        }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                    >
-                        {title}
-                    </motion.h3>
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex-1">
+                        <motion.h3 
+                            className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500"
+                            style={{ 
+                                textShadow: '0 0 20px rgba(6, 182, 212, 0.3)',
+                                fontFamily: 'system-ui, -apple-system, sans-serif'
+                            }}
+                            animate={{ 
+                                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                            }}
+                            transition={{ duration: 4, repeat: Infinity }}
+                        >
+                            {title}
+                        </motion.h3>
+                        
+                        {/* Scoring System Explanation */}
+                        <motion.div 
+                            className="mt-2 text-sm font-medium"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            {type === 'national' ? (
+                                <div className="flex items-center space-x-2 text-yellow-400">
+                                    <span className="text-lg">🎯</span>
+                                    <span>BEST ATTEMPT ONLY - Your highest single score counts</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center space-x-2 text-green-400">
+                                    <span className="text-lg">📈</span>
+                                    <span>CUMULATIVE TOTAL - All attempts from your school add up</span>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
                     
                     {/* Live Indicator */}
                     <motion.div
@@ -285,7 +307,7 @@ export default function LeaderboardSection({
                 )}
 
                 {/* Gaming-Style Footer */}
-                {!isLoading && filteredData.length > 0 && (
+                {/* {!isLoading && filteredData.length > 0 && (
                     <motion.div 
                         className="mt-6 text-center"
                         initial={{ opacity: 0 }}
@@ -309,7 +331,7 @@ export default function LeaderboardSection({
                             </div>
                         </div>
                     </motion.div>
-                )}
+                )} */}
             </div>
         </motion.div>
     );
