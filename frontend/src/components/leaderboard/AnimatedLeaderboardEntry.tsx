@@ -13,7 +13,8 @@ export interface LeaderboardEntryData {
     school_name?: string;
     county?: string;
     score: number;
-    [key: string]: unknown;
+    type?: 'national' | 'school';
+    user_count?: number;
 }
 
 interface AnimatedLeaderboardEntryProps {
@@ -160,6 +161,25 @@ export default function AnimatedLeaderboardEntry({
         return { opacity: 1, x: 0, y: 0 };
     };
 
+    const getPositionStyles = () => {
+        if (entry.position === 1) {
+            return "from-yellow-500/30 to-orange-500/30 border-yellow-400/60 shadow-yellow-400/30";
+        } else if (entry.position === 2) {
+            return "from-gray-400/30 to-gray-500/30 border-gray-300/60 shadow-gray-400/30";
+        } else if (entry.position === 3) {
+            return "from-orange-400/30 to-orange-600/30 border-orange-400/60 shadow-orange-400/30";
+        } else {
+            return "from-gray-700/50 to-gray-800/50 border-cyan-500/30 shadow-cyan-500/20";
+        }
+    };
+
+    const getPositionEmoji = () => {
+        if (entry.position === 1) return "🥇";
+        if (entry.position === 2) return "🥈";  
+        if (entry.position === 3) return "🥉";
+        return "🎯";
+    };
+
     return (
         <motion.div
             key={entry.id}
@@ -171,118 +191,235 @@ export default function AnimatedLeaderboardEntry({
                 duration: 0.6,
                 ease: "easeInOut"
             }}
-            className="p-4 rounded-xl border border-gray-700 relative overflow-hidden group"
-            style={{
-                backgroundColor: `rgba(${
-                    animationState === 'moving-up' ? '34, 197, 94' : 
-                    animationState === 'moving-down' ? '239, 68, 68' : 
-                    animationState === 'new-entry' ? '234, 179, 8' : '0, 0, 0'
-                }, ${animatedOpacity})`,
-                borderColor: animatedOpacity > 0 ? (
-                    animationState === 'moving-up' ? 'rgb(74, 222, 128)' : 
-                    animationState === 'moving-down' ? 'rgb(248, 113, 113)' : 
-                    animationState === 'new-entry' ? 'rgb(250, 204, 21)' : 'rgb(55, 65, 81)'
-                ) : 'rgb(55, 65, 81)',
-                transition: 'background-color 1s ease-out, border-color 1s ease-out'
-            }}
+            className="relative overflow-hidden group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
                 setIsHovered(false);
                 setShowDeleteConfirm(false);
             }}
         >
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    {/* Position */}
-                    <div className="text-2xl font-bold text-white">
-                        #{entry.position}
-                    </div>
-                    
-                    {/* Name */}
-                    <div>
-                        <div className="text-lg font-semibold text-white">
-                            {type === 'national' ? entry.username : entry.school_name}
-                        </div>
-                        {type === 'school' && entry.county && (
-                            <div className="text-sm text-gray-400">
-                                {entry.county}
+            {/* Background Effects */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-gray-800 via-gray-900 to-black" />
+            <motion.div 
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${getPositionStyles()}`}
+                animate={{ opacity: entry.position <= 3 ? [0.3, 0.5, 0.3] : 0.2 }}
+                transition={{ duration: 3, repeat: Infinity }}
+            />
+            
+            {/* Glowing border for top 3 */}
+            {entry.position <= 3 && (
+                <motion.div 
+                    className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${getPositionStyles()} blur-sm`}
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                />
+            )}
+
+            {/* Animation State Background */}
+            <motion.div
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                    backgroundColor: `rgba(${
+                        animationState === 'moving-up' ? '34, 197, 94' : 
+                        animationState === 'moving-down' ? '239, 68, 68' : 
+                        animationState === 'new-entry' ? '234, 179, 8' : '0, 0, 0'
+                    }, ${animatedOpacity})`,
+                    transition: 'background-color 1s ease-out'
+                }}
+            />
+
+            {/* Main Content */}
+            <div className={`relative bg-gradient-to-br from-gray-800/95 via-gray-900/95 to-black/95 border-2 ${
+                animatedOpacity > 0 ? (
+                    animationState === 'moving-up' ? 'border-green-400' : 
+                    animationState === 'moving-down' ? 'border-red-400' : 
+                    animationState === 'new-entry' ? 'border-yellow-400' : 'border-cyan-500/30'
+                ) : (entry.position <= 3 ? 
+                    entry.position === 1 ? 'border-yellow-400/60' :
+                    entry.position === 2 ? 'border-gray-300/60' :
+                    'border-orange-400/60' : 'border-cyan-500/30')
+            } rounded-2xl p-4 shadow-2xl ${entry.position <= 3 ? `shadow-${entry.position === 1 ? 'yellow' : entry.position === 2 ? 'gray' : 'orange'}-400/30` : 'shadow-cyan-500/20'} backdrop-blur-sm transition-all duration-500`}
+        >
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        {/* Position with Medal/Emoji - Smaller */}
+                        <div className="flex items-center space-x-2">
+                            <div className="text-2xl">
+                                {getPositionEmoji()}
                             </div>
-                        )}
-                    </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                    {/* Status Icon */}
-                    <div className="w-8 flex justify-center">
-                        {getStatusIcon()}
+                            <motion.div 
+                                className={`text-2xl font-black ${
+                                    entry.position === 1 ? 'text-yellow-400' :
+                                    entry.position === 2 ? 'text-gray-300' :
+                                    entry.position === 3 ? 'text-orange-400' :
+                                    'text-cyan-400'
+                                }`}
+                                style={{ 
+                                    textShadow: `0 0 8px ${
+                                        entry.position === 1 ? 'rgba(251, 191, 36, 0.6)' :
+                                        entry.position === 2 ? 'rgba(209, 213, 219, 0.6)' :
+                                        entry.position === 3 ? 'rgba(251, 146, 60, 0.6)' :
+                                        'rgba(6, 182, 212, 0.6)'
+                                    }`
+                                }}
+                            >
+                                #{entry.position}
+                            </motion.div>
+                        </div>
+                        
+                        {/* Name with Gaming Typography - Smaller */}
+                        <div className="flex flex-col">
+                            <motion.div 
+                                className={`text-lg font-bold ${
+                                    entry.position <= 3 ? 'text-white' : 'text-gray-100'
+                                }`}
+                                style={{ 
+                                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                                    textShadow: entry.position <= 3 ? '0 0 6px rgba(255, 255, 255, 0.3)' : 'none'
+                                }}
+                            >
+                                {type === 'national' ? entry.username : entry.school_name}
+                            </motion.div>
+                            {type === 'school' && (
+                                <div className="flex items-center space-x-3">
+                                    {entry.county && (
+                                        <div className="text-xs text-purple-400 font-medium">
+                                            📍 {entry.county}
+                                        </div>
+                                    )}
+                                    {'user_count' in entry && entry.user_count && (
+                                        <div className="text-xs text-cyan-400 font-medium">
+                                            👥 {entry.user_count} players
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     
-                    {/* Score */}
-                    <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-400">
-                            {entry.score}
+                    <div className="flex items-center space-x-4">
+                        {/* Status Icon with Enhanced Animation - Smaller */}
+                        <div className="w-8 flex justify-center">
+                            {getStatusIcon()}
                         </div>
-                        <div className="text-sm text-gray-400">
-                            {type === 'national' ? 'points' : 'total score'}
+                        
+                        {/* Score with Gaming Style - Smaller */}
+                        <div className="text-right">
+                            <motion.div 
+                                className={`text-2xl font-black ${
+                                    entry.position === 1 ? 'text-yellow-400' :
+                                    entry.position === 2 ? 'text-gray-300' :
+                                    entry.position === 3 ? 'text-orange-400' :
+                                    'text-blue-400'
+                                }`}
+                                style={{ 
+                                    textShadow: `0 0 10px ${
+                                        entry.position === 1 ? 'rgba(251, 191, 36, 0.6)' :
+                                        entry.position === 2 ? 'rgba(209, 213, 219, 0.6)' :
+                                        entry.position === 3 ? 'rgba(251, 146, 60, 0.6)' :
+                                        'rgba(59, 130, 246, 0.6)'
+                                    }`
+                                }}
+                                animate={entry.position <= 3 ? { 
+                                    scale: [1, 1.05, 1] 
+                                } : {}}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                {entry.score.toLocaleString()}
+                            </motion.div>
+                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wider">
+                                {type === 'national' ? '⚡ POINTS' : '🏆 TOTAL'}
+                            </div>
                         </div>
+
+                        {/* Rank Badge for Top 10 - Smaller */}
+                        {entry.position <= 10 && (
+                            <motion.div
+                                className={`px-2 py-1 rounded-full font-bold text-xs ${
+                                    entry.position <= 3 ? 
+                                        'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30' :
+                                        'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                                }`}
+                                whileHover={{ scale: 1.1 }}
+                            >
+                                TOP {entry.position <= 3 ? '3' : '10'}
+                            </motion.div>
+                        )}
                     </div>
                 </div>
             </div>
             
-            {/* Admin Overlay */}
+            {/* Enhanced Admin Overlay */}
             {isAdmin && isHovered && (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center space-x-4 rounded-xl"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="absolute inset-0 bg-gradient-to-br from-black/90 via-gray-900/90 to-black/90 flex items-center justify-center space-x-6 rounded-2xl backdrop-blur-sm border-2 border-red-500/50"
                 >
-                    {/* Bonus Points Input */}
-                    <div className="flex items-center space-x-2">
-                        <span className="text-white text-sm">Bonus:</span>
+                    {/* Bonus Points Input - Gaming Style */}
+                    <div className="flex items-center space-x-3">
+                        <span className="text-cyan-400 font-bold text-sm">💰 BONUS:</span>
                         <input
                             type="number"
                             value={bonusPoints}
                             onChange={(e) => setBonusPoints(e.target.value)}
                             onKeyDown={handleBonusPointsSubmit}
                             placeholder="±Points"
-                            className="w-20 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                            className="w-24 px-3 py-2 text-sm bg-gradient-to-r from-gray-700 to-gray-800 border-2 border-cyan-500/50 rounded-lg text-white placeholder-gray-300 font-medium focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 shadow-lg"
                             disabled={addBonusPointsMutation.isPending}
                         />
-                        <span className="text-gray-400 text-xs">Enter</span>
+                        <span className="text-green-400 text-xs font-bold">⏎ ENTER</span>
                     </div>
                     
-                    {/* Delete Button */}
+                    {/* Delete Button - Gaming Style */}
                     {!showDeleteConfirm ? (
-                        <button
+                        <motion.button
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-sm rounded-lg transition-all duration-200 shadow-lg shadow-red-500/30"
                             disabled={deleteEntryMutation.isPending}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
-                            Delete
-                        </button>
+                            🗑️ DELETE
+                        </motion.button>
                     ) : (
-                        <div className="flex items-center space-x-2">
-                            <span className="text-red-400 text-sm">Confirm?</span>
-                            <button
+                        <div className="flex items-center space-x-3">
+                            <span className="text-red-400 font-bold text-sm">⚠️ CONFIRM?</span>
+                            <motion.button
                                 onClick={handleDeleteEntry}
-                                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded"
+                                className="px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-xs rounded-lg shadow-lg"
                                 disabled={deleteEntryMutation.isPending}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
-                                Yes
-                            </button>
-                            <button
+                                ✓ YES
+                            </motion.button>
+                            <motion.button
                                 onClick={() => setShowDeleteConfirm(false)}
-                                className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded"
+                                className="px-3 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-bold text-xs rounded-lg shadow-lg"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
-                                No
-                            </button>
+                                ✗ NO
+                            </motion.button>
                         </div>
                     )}
                     
-                    {/* Loading indicator */}
+                    {/* Loading indicator - Gaming Style */}
                     {(addBonusPointsMutation.isPending || deleteEntryMutation.isPending) && (
-                        <div className="text-blue-400 text-sm">Processing...</div>
+                        <motion.div 
+                            className="flex items-center space-x-2"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            <motion.div
+                                className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            <span className="text-cyan-400 font-bold text-sm">⚡ PROCESSING...</span>
+                        </motion.div>
                     )}
                 </motion.div>
             )}

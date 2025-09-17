@@ -151,7 +151,7 @@ export default function Leaderboards() {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                     {/* National Leaderboard */}
                     <LeaderboardTable
-                        title={`National ${useDateFilter ? 'Daily' : 'All-Time'}`}
+                        title={`National ${useDateFilter ? 'Daily' : 'All-Time'} (Best Score)`}
                         entries={nationalData?.map((entry, index) => ({
                             ...entry,
                             id: entry._id || `national-${index}` // Map _id to id for compatibility
@@ -168,7 +168,7 @@ export default function Leaderboards() {
 
                     {/* School Leaderboard */}
                     <LeaderboardTable
-                        title={`School ${useDateFilter ? 'Daily' : 'All-Time'}`}
+                        title={`School ${useDateFilter ? 'Daily' : 'All-Time'} (Total Score)`}
                         entries={schoolData?.map((entry, index) => ({
                             id: entry._id || `school-${index}`,
                             _id: entry._id,
