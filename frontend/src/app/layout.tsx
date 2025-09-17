@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Colin's Game",
+  title: "Higher Options Game",
   description: "Math Game",
 };
 

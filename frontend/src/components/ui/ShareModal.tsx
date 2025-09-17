@@ -10,7 +10,7 @@ interface ShareModalProps {
 
 export default function ShareModal({ isOpen, onClose }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = 'https://colins-game.netlify.app';
+  const shareUrl = 'https://higheroptionsgame.com';
 
   const handleCopyLink = async () => {
     try {
@@ -39,7 +39,7 @@ export default function ShareModal({ isOpen, onClose }: ShareModalProps) {
       <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 max-w-md w-full space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h3 className="text-xl font-bold text-white">Share Colin's Game</h3>
+          <h3 className="text-xl font-bold text-white">Share Higher Options Game</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
@@ -53,7 +53,7 @@ export default function ShareModal({ isOpen, onClose }: ShareModalProps) {
         {/* Content */}
         <div className="text-center space-y-4">
           <p className="text-gray-300">
-            Scan the QR code or copy the link to share Colin's Game with your friends!
+            Scan the QR code or copy the link to share Higher Options Game with your friends!
           </p>
 
           {/* QR Code */}
@@ -61,7 +61,7 @@ export default function ShareModal({ isOpen, onClose }: ShareModalProps) {
             <div className="bg-white p-4 rounded-lg">
               <Image
                 src="/qr_code.png"
-                alt="QR Code for Colin's Game"
+                alt="QR Code for Higher Options Game"
                 width={200}
                 height={200}
                 className="rounded"
