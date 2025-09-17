@@ -84,10 +84,10 @@ export default function AnimatedLeaderboardEntry({
             // Start with opacity 0.2
             setAnimatedOpacity(0.2);
             
-            // Fade out after 1 second (matching your CSS transition duration)
+            // Hold the flash for 500ms, then fade out over 1 second
             const timer = setTimeout(() => {
                 setAnimatedOpacity(0);
-            }, 1000);
+            }, 500);
             
             return () => clearTimeout(timer);
         } else {
