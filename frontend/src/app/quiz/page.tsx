@@ -11,21 +11,25 @@ import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoi
 import TrueFalseQuestionComponent from '@/components/questions/TrueFalseQuestion';
 import FillBlankQuestionComponent from '@/components/questions/FillBlankQuestion';
 import MatchQuestionComponent from '@/components/questions/MatchQuestion';
+import { useSound } from '@/hooks/useSound';
+import Confetti from '@/components/ui/Confetti';
+import ShareModal from '@/components/ui/ShareModal';
 
 type QuizState = 'waiting' | 'playing' | 'finished';
 
 export default function Quiz() {
     const { auth, logout, logoutLoading } = useAuth();
     const queryClient = useQueryClient();
+    const { playSound } = useSound();
     
     // Fetch all questions and randomize them
     const { data: questionsData, isLoading: questionsLoading, error } = useGetAllQuestions();
     
-    // Filter out order questions and randomize the remaining questions
+    // Filter out order and fill_blank questions and randomize the remaining questions
     const allQuestions = useMemo(() => {
         if (!questionsData || questionsData.length === 0) return [];
-        // Filter out order type questions
-        const filteredQuestions = questionsData.filter(q => q.type !== 'order');
+        // Filter out order and fill_blank type questions
+        const filteredQuestions = questionsData.filter(q => q.type !== 'order' && q.type !== 'fill_blank');
         return [...filteredQuestions].sort(() => Math.random() - 0.5);
     }, [questionsData]);
 
@@ -45,6 +49,8 @@ export default function Quiz() {
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
     const [questionCount, setQuestionCount] = useState(0);
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     // Shuffle and get random question
     const getRandomQuestion = useCallback(() => {
@@ -86,6 +92,9 @@ export default function Quiz() {
             return () => clearTimeout(timer);
         } else if (quizState === 'playing' && timeLeft === 0) {
             setQuizState('finished');
+            // Play lesson complete sound and show confetti
+            playSound('complete');
+            setShowConfetti(true);
             // Submit score to leaderboard when quiz finishes
             if (auth) {
                 submitScoreMutation.mutate({
@@ -106,6 +115,7 @@ export default function Quiz() {
     // Play again
     const playAgain = () => {
         setQuizState('waiting');
+        setShowConfetti(false);
     };
 
     const handleLogout = () => {
@@ -279,6 +289,28 @@ export default function Quiz() {
                             </div>
                         </div>
 
+                        {/* Share Section */}
+                        <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-xl p-6 space-y-4">
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-bold text-white">🚀 GET YOUR SCHOOL UP THE LEADERBOARD</h3>
+                                <p className="text-purple-200 font-medium">SHARE WITH FRIENDS!</p>
+                                <p className="text-sm text-gray-300">Every point counts towards your school's ranking</p>
+                            </div>
+                            <button
+                                onClick={() => setShowShareModal(true)}
+                                className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 
+                                         text-white font-medium rounded-xl transition-all duration-200 transform active:scale-95
+                                         shadow-lg shadow-purple-600/25"
+                            >
+                                <span className="flex items-center justify-center space-x-2">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                    </svg>
+                                    <span>Share Game</span>
+                                </span>
+                            </button>
+                        </div>
+
                         {/* Action Buttons */}
                         <div className="space-y-4">
                             <button
@@ -311,6 +343,15 @@ export default function Quiz() {
                     </div>
                 )}
             </main>
+
+            {/* Confetti Animation */}
+            {showConfetti && <Confetti duration={3000} pieceCount={75} />}
+
+            {/* Share Modal */}
+            <ShareModal 
+                isOpen={showShareModal} 
+                onClose={() => setShowShareModal(false)} 
+            />
         </div>
     );
 }

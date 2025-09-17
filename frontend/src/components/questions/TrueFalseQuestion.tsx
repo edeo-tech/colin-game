@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrueFalseQuestion } from '@/_interfaces/questions/questions';
+import { useSound } from '@/hooks/useSound';
 
 interface TrueFalseQuestionProps {
     question: TrueFalseQuestion;
@@ -17,6 +18,7 @@ export default function TrueFalseQuestionComponent({
     const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
+    const { playSound } = useSound();
 
     // Reset state when question changes
     useEffect(() => {
@@ -49,6 +51,9 @@ export default function TrueFalseQuestionComponent({
         const correct = answer === question.answer;
         setIsCorrect(correct);
         setShowResult(true);
+
+        // Play sound for correct or incorrect answer
+        playSound(correct ? 'correct' : 'incorrect');
 
         if (correct) {
             // Auto move to next question after short delay for correct answers

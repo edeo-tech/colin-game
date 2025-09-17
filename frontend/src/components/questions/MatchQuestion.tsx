@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { MatchQuestion } from '@/_interfaces/questions/questions';
+import { useSound } from '@/hooks/useSound';
 
 interface MatchQuestionProps {
     question: MatchQuestion;
@@ -47,6 +48,7 @@ export default function MatchQuestionComponent({
     const [showResult, setShowResult] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [wrongMatch, setWrongMatch] = useState<{item1: string, item2: string} | null>(null);
+    const { playSound } = useSound();
 
     // Reset state and randomize items when question changes
     useEffect(() => {
@@ -91,6 +93,9 @@ export default function MatchQuestionComponent({
         const allCorrect = matches.length === Object.keys(question.pairs).length;
         setIsCorrect(allCorrect);
         setShowResult(true);
+
+        // Play sound for correct or incorrect answer
+        playSound(allCorrect ? 'correct' : 'incorrect');
 
         if (allCorrect) {
             // Auto move to next question after delay
@@ -183,6 +188,9 @@ export default function MatchQuestionComponent({
                     setTimeout(() => {
                         setIsCorrect(false);
                         setShowResult(true);
+                        
+                        // Play incorrect sound
+                        playSound('incorrect');
                         
                         // Auto-navigate to next question after showing the wrong match
                         setTimeout(() => {

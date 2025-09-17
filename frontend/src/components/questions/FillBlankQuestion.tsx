@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FillBlankQuestion } from '@/_interfaces/questions/questions';
 import { useCheckAnswer } from '@/_queries/questions/questions';
+import { useSound } from '@/hooks/useSound';
 
 interface FillBlankQuestionProps {
     question: FillBlankQuestion;
@@ -19,6 +20,7 @@ export default function FillBlankQuestionComponent({
     const [showResult, setShowResult] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
     const [correctionReason, setCorrectionReason] = useState('');
+    const { playSound } = useSound();
 
     // Use the React Query mutation hook
     const checkAnswerMutation = useCheckAnswer();
@@ -63,6 +65,9 @@ export default function FillBlankQuestionComponent({
                 setCorrectionReason(result.reason || '');
                 setShowResult(true);
                 
+                // Play sound for correct or incorrect answer
+                playSound(result.is_correct ? 'correct' : 'incorrect');
+                
                 // Auto-continue after answer
                 if (result.is_correct) {
                     setTimeout(() => {
@@ -96,6 +101,9 @@ export default function FillBlankQuestionComponent({
                 setIsCorrect(correct);
                 setCorrectionReason(correct ? 'Correct answer!' : 'Answer does not match expected response.');
                 setShowResult(true);
+                
+                // Play sound for correct or incorrect answer
+                playSound(correct ? 'correct' : 'incorrect');
                 
                 // Auto-continue after answer
                 if (correct) {

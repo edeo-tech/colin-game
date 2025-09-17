@@ -124,7 +124,7 @@ export default function Home() {
                             </div>
 
                             {/* Admin Navigation Cards */}
-                            <div className="grid gap-6 sm:grid-cols-2">
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {/* Admin Dashboard Card */}
                                 <Link 
                                     href="/admin/dashboard"
@@ -173,6 +173,32 @@ export default function Home() {
                                         </h3>
                                         <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-200">
                                             Advanced leaderboard management and analytics
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                {/* QR Code Card */}
+                                <Link 
+                                    href="/admin/qr-code"
+                                    className="group bg-gray-800 border border-yellow-700/50 rounded-2xl p-8 
+                                             hover:bg-gray-700 hover:border-yellow-600 
+                                             transition-all duration-200 cursor-pointer
+                                             shadow-xl shadow-yellow-900/10 hover:shadow-2xl 
+                                             transform hover:scale-105 active:scale-95"
+                                >
+                                    <div className="text-center space-y-4">
+                                        <div className="w-16 h-16 bg-yellow-600 rounded-2xl mx-auto flex items-center justify-center 
+                                                      group-hover:bg-yellow-500 transition-colors duration-200">
+                                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2l-2-2v2zM5 16h2l-2 2v-2zM11 20h1m8-8v4h-2l2-2zM20 8v4h-2l2 2V8z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-white group-hover:text-yellow-300 transition-colors duration-200">
+                                            Site QR Code
+                                        </h3>
+                                        <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-200">
+                                            Display the site QR code for sharing
                                         </p>
                                     </div>
                                 </Link>

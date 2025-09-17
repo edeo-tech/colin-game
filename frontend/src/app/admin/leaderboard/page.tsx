@@ -6,6 +6,7 @@ import AdminGuard from '@/components/auth/AdminGuard';
 // import Link from 'next/link';
 import LeaderboardSection from '@/components/leaderboard/LeaderboardSection';
 import { useAdminNationalLeaderboard, useAdminSchoolLeaderboard } from '@/_queries/leaderboard/admin-leaderboard';
+import Image from 'next/image';
 
 export default function AdminLeaderboard() {
     // const { auth, logout, logoutLoading } = useAuth();
@@ -71,16 +72,23 @@ export default function AdminLeaderboard() {
                     </div>
                 </nav> */}
 
+                {/* Floating QR Code */}
+                <div className="fixed bottom-4 left-4 z-50">
+                    <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-xl">
+                        <div className="relative" style={{ width: '10vw', height: '10vw' }}>
+                            <Image
+                                src="/qr_code.png"
+                                alt="Site QR Code"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 {/* Main Content */}
                 <main className="max-w-[1400px] mx-auto px-4 py-8">
-                    {/* Header Section */}
-                    {/* <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-2">Live Admin Leaderboards</h2>
-                        <p className="text-gray-300 text-sm">
-                            Real-time leaderboards with 10-second auto-refresh. Use Ctrl+F to search within each leaderboard.
-                        </p>
-                    </div> */}
-
                     {/* Leaderboards Grid */}
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         {/* National Leaderboard */}
