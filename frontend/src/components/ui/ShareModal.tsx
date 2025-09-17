@@ -10,7 +10,8 @@ interface ShareModalProps {
 
 export default function ShareModal({ isOpen, onClose }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl = 'https://higheroptionsgame.com';
+  // const shareUrl = 'https://higheroptionsgame.com';
+  const shareUrl = 'https://colins-game.netlify.app';
 
   const handleCopyLink = async () => {
     try {
