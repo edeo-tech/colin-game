@@ -8,6 +8,7 @@ import {
     useGetSchoolAllTime, 
     useGetSchoolByDate 
 } from '@/_queries/leaderboard/leaderboard';
+import { UserRole } from '@/_interfaces/users/user-role';
 import LeaderboardTable from '@/components/leaderboard/LeaderboardTable';
 import Link from 'next/link';
 
@@ -79,13 +80,15 @@ export default function Leaderboards() {
                                 Welcome, {auth.username}! 
                                 <span className="text-gray-400 text-sm ml-2">({auth.role})</span>
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                disabled={logoutLoading}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {logoutLoading ? 'Logging out...' : 'Logout'}
-                            </button>
+                            {auth.role === UserRole.ADMIN && (
+                                <button
+                                    onClick={handleLogout}
+                                    disabled={logoutLoading}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {logoutLoading ? 'Logging out...' : 'Logout'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

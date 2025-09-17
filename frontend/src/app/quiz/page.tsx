@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth/AuthContext';
 import { useGetAllQuestions } from '@/_queries/questions/questions';
 import { useSubmitScore } from '@/_queries/leaderboard/leaderboard';
 import { Question, MultipleChoiceQuestion, TrueFalseQuestion, FillBlankQuestion, MatchQuestion } from '@/_interfaces/questions/questions';
+import { UserRole } from '@/_interfaces/users/user-role';
 import Link from 'next/link';
 import MultipleChoiceQuestionComponent from '@/components/questions/MultipleChoiceQuestion';
 import TrueFalseQuestionComponent from '@/components/questions/TrueFalseQuestion';
@@ -150,13 +151,15 @@ export default function Quiz() {
                                 Welcome, {auth.username}! 
                                 <span className="text-gray-400 text-sm ml-2">({auth.role})</span>
                             </span>
-                            <button
-                                onClick={handleLogout}
-                                disabled={logoutLoading}
-                                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {logoutLoading ? 'Logging out...' : 'Logout'}
-                            </button>
+                            {auth.role === UserRole.ADMIN && (
+                                <button
+                                    onClick={handleLogout}
+                                    disabled={logoutLoading}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {logoutLoading ? 'Logging out...' : 'Logout'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

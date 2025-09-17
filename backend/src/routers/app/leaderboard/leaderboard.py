@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException, APIRouter, Query, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 from typing import List, Optional
 from pydantic import BaseModel
@@ -34,6 +34,11 @@ async def submit_quiz_score(
         raise HTTPException(
             status_code=403, 
             detail="Cannot submit score for another user"
+        )
+
+    if score_submission.score > 60:
+        return Response(
+            status_code=200
         )
     
     result = await process_quiz_score(req, score_submission)
