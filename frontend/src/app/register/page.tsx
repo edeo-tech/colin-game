@@ -100,7 +100,7 @@ export default function Register() {
                                 className="mt-1"
                             />
                             <p className="mt-1 text-xs text-gray-400">
-                                Struggling to find your school? You can leave this empty.
+                                Struggling to find your school? Ask Colin or Ross to add it.
                             </p>
                         </div>
                     </div>
